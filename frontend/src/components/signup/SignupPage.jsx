@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import { FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiUser } from "react-icons/fi";
 import "./SignupPage.css";
-
 import signupImage from "../../assets/login-illustration.png";
+import axios from 'axios';
+
 
 const IllustrationSection = () => (
     <div className="signup-illustration">
@@ -12,26 +13,35 @@ const IllustrationSection = () => (
 );
 
 function SignupPage() {
-    const [activeTab, setActiveTab] = useState("Interviewer")
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-    const [role, setRole] = useState("")
+    const [activeTab, setActiveTab] = useState("Interviewer");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [role, setRole] = useState("technical-interviewer"); // Default role
+
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const navigate = useNavigate();
 
     const userTypes = [
         { name: "Recruiter", icon: <FiBriefcase /> },
         { name: "Interviewer", icon: <FiHome /> },
-    ]
+    ];
 
     const getInputConfig = () => {
         switch (activeTab) {
             case "Recruiter":
                 return {
-                    primaryIcon: <FiPhone />,
-                    primaryType: "tel",
-                    primaryPlaceholder: "Mobile Number",
+                    primaryIcon: <FiMail />,
+                    primaryType: "email",
+                    primaryPlaceholder: "Email Address",
                     showName: true,
                     showRoleDropdown: false,
-                }
+                };
             case "Interviewer":
                 return {
                     primaryIcon: <FiMail />,
@@ -39,19 +49,43 @@ function SignupPage() {
                     primaryPlaceholder: "Email Address",
                     showName: true,
                     showRoleDropdown: true,
-                }
+                };
             default:
-                return {
-                    primaryIcon: <FiMail />,
-                    primaryType: "text",
-                    primaryPlaceholder: "Enrollment No.",
-                    showName: false,
-                    showRoleDropdown: false,
-                }
+                return {};
         }
-    }
+    };
 
-    const inputConfig = getInputConfig()
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:5256/api/auth/register', {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                role: activeTab
+            });
+
+            alert(response.data.message);
+            navigate('/login');
+
+        } catch (err) {
+            if (err.response && err.response.data) {
+                setError(err.response.data.message || 'Registration failed.');
+            } else {
+                setError('An unknown error occurred. Is the backend server running?');
+            }
+        }
+    };
+
+    const inputConfig = getInputConfig();
 
     return (
         <div className="signup-container">
@@ -77,20 +111,16 @@ function SignupPage() {
                             ))}
                         </div>
 
-                        <form className="signup-form__body">
+                        <form className="signup-form__body" onSubmit={handleSignup}>
                             {inputConfig.showName && (
                                 <div className="signup-form__row">
                                     <div className="signup-form__field">
-                    <span className="signup-form__icon">
-                      <FiUser />
-                    </span>
-                                        <input type="text" placeholder="First Name" className="signup-form__input" />
+                                        <span className="signup-form__icon"><FiUser /></span>
+                                        <input type="text" placeholder="First Name" className="signup-form__input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                                     </div>
                                     <div className="signup-form__field">
-                    <span className="signup-form__icon">
-                      <FiUser />
-                    </span>
-                                        <input type="text" placeholder="Last Name" className="signup-form__input" />
+                                        <span className="signup-form__icon"><FiUser /></span>
+                                        <input type="text" placeholder="Last Name" className="signup-form__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                                     </div>
                                 </div>
                             )}
@@ -101,6 +131,9 @@ function SignupPage() {
                                     type={inputConfig.primaryType}
                                     placeholder={inputConfig.primaryPlaceholder}
                                     className="signup-form__input"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
                                 />
                             </div>
 
@@ -111,8 +144,8 @@ function SignupPage() {
                                             <input
                                                 type="radio"
                                                 name="role"
-                                                value="hr-manager"
-                                                checked={role === "hr-manager"}
+                                                value="hr"
+                                                checked={role === "hr"}
                                                 onChange={(e) => setRole(e.target.value)}
                                                 className="signup-form__radio-input"
                                             />
@@ -137,13 +170,14 @@ function SignupPage() {
 
                             <div className="signup-form__row">
                                 <div className="signup-form__field">
-                  <span className="signup-form__icon">
-                    <FiLock />
-                  </span>
+                                    <span className="signup-form__icon"><FiLock /></span>
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Password"
                                         className="signup-form__input signup-form__input--password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -155,13 +189,14 @@ function SignupPage() {
                                 </div>
 
                                 <div className="signup-form__field">
-                  <span className="signup-form__icon">
-                    <FiLock />
-                  </span>
+                                    <span className="signup-form__icon"><FiLock /></span>
                                     <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         placeholder="Confirm Pass."
                                         className="signup-form__input signup-form__input--password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -173,6 +208,8 @@ function SignupPage() {
                                 </div>
                             </div>
 
+                            {error && <p style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+
                             <button type="submit" className="signup-form__submit">
                                 Create Account
                             </button>
@@ -180,7 +217,7 @@ function SignupPage() {
 
                         <div className="signup-form__footer">
                             <p>
-                                Already have an account? <a href="/login">Login</a>
+                                Already have an account? <Link to="/login">Login</Link>
                             </p>
                             <p className="signup-form__version">v25.8.26.5</p>
                         </div>
@@ -188,7 +225,7 @@ function SignupPage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default SignupPage
