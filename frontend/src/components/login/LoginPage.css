@@ -284,6 +284,6 @@ body {
     }
 
     .auth-form {
-        margin: 0; /* Reset margin for grid layout */
+        margin: 0;
     }
 }

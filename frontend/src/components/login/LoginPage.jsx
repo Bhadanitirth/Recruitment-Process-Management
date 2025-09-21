@@ -1,24 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone } from 'react-icons/fi';
 import './LoginPage.css';
 import loginImage from '../../assets/login-illustration.png';
+import axios from 'axios';
 
-// Component for the illustration section for better separation
 const IllustrationSection = () => (
     <div className="auth-illustration">
         <img src={loginImage} alt="A person working on a laptop." className="auth-illustration__image" />
     </div>
 );
 
-// Configuration for different user types to keep the main component clean
 const userTypes = [
     { name: 'Candidate', icon: <FiUser /> },
     { name: 'Recruiter', icon: <FiBriefcase /> },
     { name: 'Interviewer', icon: <FiHome /> },
 ];
 
-// Configuration for input fields based on user type, using a more declarative object map
 const inputConfigs = {
     Candidate: {
         icon: <FiMail />,
@@ -41,7 +39,37 @@ function LoginPage() {
     const [activeTab, setActiveTab] = useState('Candidate');
     const [showPassword, setShowPassword] = useState(false);
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const navigate = useNavigate();
+
     const currentInputConfig = inputConfigs[activeTab];
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const response = await axios.post('http://localhost:5256/api/auth/login', {
+                email: email,
+                password: password,
+                userType: activeTab
+            });
+
+            localStorage.setItem('token', response.data.data);
+            alert(response.data.message);
+            navigate('/dashboard');
+
+        } catch (err) {
+            if (err.response && err.response.data) {
+                setError(err.response.data.message || 'Login failed. Please check your credentials.');
+            } else {
+                setError('An unknown error occurred.');
+            }
+        }
+    };
 
     return (
         <div className="auth-container">
@@ -67,14 +95,16 @@ function LoginPage() {
                             ))}
                         </div>
 
-                        <form className="auth-form__body">
+                        <form className="auth-form__body" onSubmit={handleLogin}>
                             <div className="auth-form__field">
                                 <span className="auth-form__icon">{currentInputConfig.icon}</span>
                                 <input
                                     type={currentInputConfig.type}
                                     placeholder={currentInputConfig.placeholder}
-                                    aria-label={currentInputConfig.placeholder}
                                     className="auth-form__input"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
                                 />
                             </div>
 
@@ -83,8 +113,10 @@ function LoginPage() {
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="Password"
-                                    aria-label="Password"
                                     className="auth-form__input auth-form__input--password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
                                 />
                                 <button
                                     type="button"
@@ -95,6 +127,8 @@ function LoginPage() {
                                     {showPassword ? <FiEye /> : <FiEyeOff />}
                                 </button>
                             </div>
+
+                            {error && <p className="auth-form__error">{error}</p>}
 
                             <div className="auth-form__forgot">
                                 <a href="#">Forgot Password?</a>
