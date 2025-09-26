@@ -20,13 +20,13 @@ const userTypes = [
 const inputConfigs = {
     Candidate: {
         icon: <FiMail />,
-        type: 'text',
-        placeholder: 'Enrollment No.',
+        type: 'email',
+        placeholder: 'Email Address',
     },
     Recruiter: {
-        icon: <FiPhone />,
-        type: 'tel',
-        placeholder: 'Mobile Number',
+        icon: <FiMail />,
+        type: 'email',
+        placeholder: 'Email Address',
     },
     Interviewer: {
         icon: <FiMail />,
@@ -47,29 +47,42 @@ function LoginPage() {
 
     const currentInputConfig = inputConfigs[activeTab];
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError('');
+const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        try {
-            const response = await axios.post('http://localhost:5256/api/auth/login', {
-                email: email,
-                password: password,
-                userType: activeTab
-            });
+    try {
+        const response = await axios.post('http://localhost:5256/api/auth/login', {
+            email: email,
+            password: password,
+            userType: activeTab
+        });
 
-            localStorage.setItem('token', response.data.data);
-            alert(response.data.message);
-            navigate('/dashboard');
+        localStorage.setItem('token', response.data.data);
+        localStorage.setItem('userType', activeTab);
 
-        } catch (err) {
-            if (err.response && err.response.data) {
-                setError(err.response.data.message || 'Login failed. Please check your credentials.');
-            } else {
-                setError('An unknown error occurred.');
-            }
+        switch (activeTab) {
+            case 'Recruiter':
+                navigate('/recruiter-dashboard');
+                break;
+            case 'Interviewer':
+                navigate('/interviewer-dashboard');
+                break;
+            case 'Candidate':
+                navigate('/candidate-dashboard');
+                break;
+            default:
+                navigate('/');
         }
-    };
+
+    } catch (err) {
+        if (err.response && err.response.data) {
+            setError(err.response.data.message || 'Login failed. Please check your credentials.');
+        } else {
+            setError('An unknown error occurred.');
+        }
+    }
+};
 
     return (
         <div className="auth-container">

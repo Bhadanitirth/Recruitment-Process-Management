@@ -1,21 +1,50 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/login/LoginPage';
 import SignupPage from './components/signup/SignupPage';
-import DashboardPage from './components/Dashboard/DashboardPage';
-import './App.css';
+import InterviewerDashboard from './components/InterviewerDashboard';
+import CandidateDashboard from './components/CandidateDashboard';
+import RecruiterDashboard from './components/RecruiterDashboard';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import JobDetailsPage from './components/JobDetailsPage';
 
 function App() {
     return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                </Routes>
-            </div>
-        </Router>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route
+                    path="/recruiter-dashboard"
+                    element={
+                    <ProtectedRoute allowedUserTypes={['Recruiter']}>
+                        <RecruiterDashboard />
+                    </ProtectedRoute>
+                }
+                />
+                <Route
+                    path="/interviewer-dashboard"
+                    element={
+                    <ProtectedRoute allowedUserTypes={['Interviewer']}>
+                        <InterviewerDashboard />
+                    </ProtectedRoute>
+                }
+                />
+                <Route
+                    path="/candidate-dashboard"
+                    element={
+                    <ProtectedRoute allowedUserTypes={['Candidate']}>
+                        <CandidateDashboard />
+                    </ProtectedRoute>
+                }
+                />
+                <Route path="/jobs/:jobId" element={
+                    <ProtectedRoute allowedRoles={['Recruiter']}>
+                        <JobDetailsPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/" element={<Navigate to="/login" replace />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
