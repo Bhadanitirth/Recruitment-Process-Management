@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Recruitment.API.Models; 
+using Recruitment.API.Models;
 
 namespace Recruitment.API.Data
 {
@@ -10,8 +10,13 @@ namespace Recruitment.API.Data
         }
 
         public DbSet<Role> Roles { get; set; }
-
         public DbSet<User> Users { get; set; }
+        public DbSet<Job> Jobs { get; set; }
+        public DbSet<Candidate> Candidates { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<JobSkill> Job_Skills { get; set; }
 
+        public DbSet<Application> Applications { get; set; }
     }
 }
+
