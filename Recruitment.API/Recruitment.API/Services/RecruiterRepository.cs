@@ -55,14 +55,16 @@ namespace Recruitment.API.Services
             }
 
             await _context.SaveChangesAsync();
+
             return new ServiceResponse<Job> { Data = job, Message = "Job with skills created successfully." };
         }
 
+        // --- UPDATED METHOD: CreateCandidateAsync ---
         public async Task<ServiceResponse<Candidate>> CreateCandidateAsync(CandidateCreateDto candidateDto, IFormFile cvFile)
         {
             if (await _context.Users.AnyAsync(u => u.email == candidateDto.Email))
             {
-                return new ServiceResponse<Candidate> { Success = false, Message = "A user with this email already exists in the system." };
+                return new ServiceResponse<Candidate> { Success = false, Message = "A user with this email already exists." };
             }
 
             var candidate = new Candidate
@@ -72,22 +74,27 @@ namespace Recruitment.API.Services
                 email = candidateDto.Email,
                 phone = candidateDto.Phone,
                 created_by_user_id = GetUserId(),
-                cv_path = "" 
+                cv_path = "" // Placeholder
             };
-            _context.Candidates.Add(candidate);
 
             var newUser = CreateUserForCandidate(candidate);
+
+            _context.Candidates.Add(candidate);
             _context.Users.Add(newUser);
 
+            await _context.SaveChangesAsync(); // Save both to get the newUser ID
+
+            // Link the new user_id back to the candidate and save the link
+            candidate.user_id = newUser.user_id;
             await _context.SaveChangesAsync();
-            return new ServiceResponse<Candidate> { Data = candidate, Message = "Candidate created successfully." };
+
+            return new ServiceResponse<Candidate> { Data = candidate, Message = "Candidate and user account created successfully." };
         }
 
+        // --- UPDATED METHOD: BulkCreateCandidatesAsync ---
         public async Task<ServiceResponse<int>> BulkCreateCandidatesAsync(IFormFile file)
         {
-            var response = new ServiceResponse<int>();
             var newCandidates = new List<Candidate>();
-            var newUsers = new List<User>();
             var existingUserEmails = new HashSet<string>(await _context.Users.Select(u => u.email).ToListAsync());
             int createdCount = 0;
 
@@ -97,13 +104,16 @@ namespace Recruitment.API.Services
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var worksheet = workbook.Worksheet(1);
-                    if (worksheet == null) return new ServiceResponse<int> { Success = false, Message = "Excel file is empty." };
+                    if (worksheet == null) return new ServiceResponse<int> { Success = false, Message = "Excel sheet is empty." };
 
                     var rows = worksheet.RowsUsed().Skip(1);
                     foreach (var row in rows)
                     {
                         var email = row.Cell(3).Value.ToString().Trim();
-                        if (string.IsNullOrEmpty(email) || existingUserEmails.Contains(email) || newUsers.Any(u => u.email == email)) continue;
+                        if (string.IsNullOrEmpty(email) || existingUserEmails.Contains(email) || newCandidates.Any(c => c.email == email))
+                        {
+                            continue;
+                        }
 
                         var candidate = new Candidate
                         {
@@ -114,22 +124,45 @@ namespace Recruitment.API.Services
                             created_by_user_id = GetUserId()
                         };
                         newCandidates.Add(candidate);
-                        newUsers.Add(CreateUserForCandidate(candidate));
                     }
                 }
             }
 
             if (newCandidates.Any())
             {
-                _context.Candidates.AddRange(newCandidates);
-                _context.Users.AddRange(newUsers);
-                await _context.SaveChangesAsync();
-                createdCount = newCandidates.Count;
+                // Use a transaction to ensure everything saves or nothing does
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        // 1. Save all candidates first
+                        _context.Candidates.AddRange(newCandidates);
+                        await _context.SaveChangesAsync();
+
+                        // 2. Now create a user for each new candidate and link them
+                        foreach (var candidate in newCandidates)
+                        {
+                            var newUser = CreateUserForCandidate(candidate);
+                            _context.Users.Add(newUser);
+                            await _context.SaveChangesAsync(); // Save user to get ID
+                            candidate.user_id = newUser.user_id; // Link the ID
+                        }
+
+                        // 3. Save the user_id links to the candidates table
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        createdCount = newCandidates.Count;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        return new ServiceResponse<int> { Success = false, Message = "An error occurred during bulk creation." };
+                    }
+                }
             }
 
-            response.Data = createdCount;
-            response.Message = $"{createdCount} new candidates were successfully added.";
-            return response;
+            return new ServiceResponse<int> { Data = createdCount, Message = $"{createdCount} candidates and user accounts created." };
         }
 
         public async Task<ServiceResponse<List<Job>>> GetJobsAsync()
@@ -181,7 +214,7 @@ namespace Recruitment.API.Services
                 last_name = candidate.last_name,
                 email = candidate.email,
                 password_hash = passwordHash,
-                role_id = 6
+                role_id = 6 // Role ID for 'Candidate'
             };
         }
 
@@ -190,8 +223,8 @@ namespace Recruitment.API.Services
             var response = new ServiceResponse<List<Application>>
             {
                 Data = await _context.Applications
-                                    .Include(a => a.Candidate)
-                                    .ToListAsync()
+                                     .Include(a => a.Candidate)
+                                     .ToListAsync()
             };
             return response;
         }

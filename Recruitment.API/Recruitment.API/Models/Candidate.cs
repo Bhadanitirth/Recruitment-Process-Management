@@ -14,6 +14,7 @@ namespace Recruitment.API.Models
         public string? cv_path { get; set; }
         public int created_by_user_id { get; set; }
         public DateTime created_at { get; set; } = DateTime.UtcNow;
+        public int? user_id { get; set; }
 
         [ForeignKey("created_by_user_id")]
         public virtual User CreatedBy { get; set; }
