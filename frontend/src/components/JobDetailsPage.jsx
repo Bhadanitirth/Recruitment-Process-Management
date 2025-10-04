@@ -58,9 +58,12 @@ function JobDetailsPage() {
                 <h3>Applied Candidates ({applications.length})</h3>
                 {applications.length > 0 ? (
                     applications.map(app => (
-                        <div key={app.application_id} className="application-item">
-                            <p>Candidate ID: {app.candidate_id}</p>
-                            <p>Status: {app.status}</p>
+                        <div key={app.application_id} className="list-item">
+                            <div>
+                                <h3>{app.candidate.first_name} {app.candidate.last_name}</h3>
+                                <p>{app.candidate.email}</p>
+                            </div>
+                            <span className="application-status">{app.status}</span>
                         </div>
                     ))
                 ) : (
