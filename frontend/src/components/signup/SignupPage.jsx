@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiUser } from "react-icons/fi";
+// Add FiEdit3 for Reviewer icon
+import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiEdit3 } from "react-icons/fi";
 import "./SignupPage.css";
 import signupImage from "../../assets/login-illustration.png";
 import axios from 'axios';
-
 
 const IllustrationSection = () => (
     <div className="signup-illustration">
@@ -16,7 +16,7 @@ function SignupPage() {
     const [activeTab, setActiveTab] = useState("Interviewer");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [role, setRole] = useState("technical-interviewer"); // Default role
+    const [role, setRole] = useState("technical-interviewer");
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -30,6 +30,7 @@ function SignupPage() {
     const userTypes = [
         { name: "Recruiter", icon: <FiBriefcase /> },
         { name: "Interviewer", icon: <FiHome /> },
+        { name: "Reviewer", icon: <FiEdit3 /> },
     ];
 
     const getInputConfig = () => {
@@ -50,7 +51,15 @@ function SignupPage() {
                     showName: true,
                     showRoleDropdown: true,
                 };
-            default:
+            case "Reviewer":
+                return {
+                    primaryIcon: <FiMail />,
+                    primaryType: "email",
+                    primaryPlaceholder: "Email Address",
+                    showName: true,
+                    showRoleDropdown: false,
+                };
+            default: // Default case
                 return {};
         }
     };
@@ -137,14 +146,14 @@ function SignupPage() {
                                 />
                             </div>
 
-                            {inputConfig.showRoleDropdown && (
+                            {inputConfig.showRoleDropdown && activeTab === 'Interviewer' && (
                                 <div className="signup-form__field">
                                     <div className="signup-form__radio-group">
                                         <label className="signup-form__radio-label">
                                             <input
                                                 type="radio"
                                                 name="role"
-                                                value="hr"
+                                                value="hr" // Corresponds to HR role in backend?
                                                 checked={role === "hr"}
                                                 onChange={(e) => setRole(e.target.value)}
                                                 className="signup-form__radio-input"
@@ -156,7 +165,7 @@ function SignupPage() {
                                             <input
                                                 type="radio"
                                                 name="role"
-                                                value="technical-interviewer"
+                                                value="technical-interviewer" // Corresponds to Technical role?
                                                 checked={role === "technical-interviewer"}
                                                 onChange={(e) => setRole(e.target.value)}
                                                 className="signup-form__radio-input"
@@ -179,11 +188,7 @@ function SignupPage() {
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="signup-form__toggle-password"
-                                    >
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="signup-form__toggle-password">
                                         {showPassword ? <FiEye /> : <FiEyeOff />}
                                     </button>
                                 </div>
@@ -198,11 +203,7 @@ function SignupPage() {
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="signup-form__toggle-password"
-                                    >
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="signup-form__toggle-password">
                                         {showConfirmPassword ? <FiEye /> : <FiEyeOff />}
                                     </button>
                                 </div>
@@ -216,10 +217,8 @@ function SignupPage() {
                         </form>
 
                         <div className="signup-form__footer">
-                            <p>
-                                Already have an account? <Link to="/login">Login</Link>
-                            </p>
-                            <p className="signup-form__version">v25.8.26.5</p>
+                            <p>Already have an account? <Link to="/login">Login</Link></p>
+                            <p className="signup-form__version">v25.10.29.1</p> {/* Updated version */}
                         </div>
                     </div>
                 </div>
@@ -228,4 +227,5 @@ function SignupPage() {
     );
 }
 
-export default SignupPage
+export default SignupPage;
+

@@ -76,3 +76,32 @@
 }
 .error-message { color: #ef4444; text-align: center; }
 
+
+.job-details-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.job-details-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4f46e5;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.job-details-actions button:hover {
+    background-color: #4338ca;
+}
+
+.list-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+
