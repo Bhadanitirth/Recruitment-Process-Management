@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone } from 'react-icons/fi';
+import {FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiEdit3} from 'react-icons/fi';
 import './LoginPage.css';
 import loginImage from '../../assets/login-illustration.png';
 import axios from 'axios';
@@ -15,6 +15,7 @@ const userTypes = [
     { name: 'Candidate', icon: <FiUser /> },
     { name: 'Recruiter', icon: <FiBriefcase /> },
     { name: 'Interviewer', icon: <FiHome /> },
+    { name: 'Reviewer', icon: <FiEdit3 /> },
 ];
 
 const inputConfigs = {
@@ -29,6 +30,11 @@ const inputConfigs = {
         placeholder: 'Email Address',
     },
     Interviewer: {
+        icon: <FiMail />,
+        type: 'email',
+        placeholder: 'Email Address',
+    },
+    Reviewer: {
         icon: <FiMail />,
         type: 'email',
         placeholder: 'Email Address',
@@ -70,6 +76,9 @@ const handleLogin = async (e) => {
                 break;
             case 'Candidate':
                 navigate('/candidate-dashboard');
+                break;
+            case 'Reviewer':
+                navigate('/reviewer-dashboard');
                 break;
             default:
                 navigate('/');

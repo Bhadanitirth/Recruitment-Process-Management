@@ -17,6 +17,9 @@ namespace Recruitment.API.Data
         public DbSet<JobSkill> Job_Skills { get; set; }
 
         public DbSet<Application> Applications { get; set; }
+        public DbSet<JobReviewer> JobReviewers { get; set; }
+        public DbSet<ApplicationComment> Application_Comments { get; set; }
+        public DbSet<JobReviewer> Job_Reviewers { get; set; }
     }
 }
 

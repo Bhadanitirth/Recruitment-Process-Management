@@ -17,7 +17,8 @@ namespace Recruitment.API.Services
         Task<ServiceResponse<List<Skill>>> GetSkillsAsync();
         Task<ServiceResponse<Skill>> CreateSkillAsync(SkillCreateDto skillDto);
         Task<ServiceResponse<Application>> LinkCandidateToJobAsync(int jobId, ApplicationCreateDto appDto);
-        Task<ServiceResponse<List<Application>>> GetApplicationsAsync();
+        Task<ServiceResponse<List<Application>>> GetApplicationsAsync(); Task<ServiceResponse<List<UserDto>>> GetAvailableReviewersAsync();
+        Task<ServiceResponse<JobReviewer>> AssignReviewerToJobAsync(int jobId, int reviewerUserId);
     }
 }
 

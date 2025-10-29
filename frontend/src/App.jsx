@@ -6,6 +6,8 @@ import CandidateDashboard from './components/CandidateDashboard';
 import RecruiterDashboard from './components/RecruiterDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import JobDetailsPage from './components/JobDetailsPage';
+import ApplicationReviewPage from './components/ApplicationReviewPage';
+import ReviewerDashboard from "./components/ReviewerDashboard.jsx";
 
 function App() {
     return (
@@ -13,6 +15,14 @@ function App() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route
+                    path="/reviewer-dashboard"
+                    element={
+                        <ProtectedRoute allowedUserTypes={['Reviewer']}>
+                            <ReviewerDashboard />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/recruiter-dashboard"
                     element={
@@ -41,7 +51,14 @@ function App() {
                     <ProtectedRoute allowedRoles={['Recruiter']}>
                         <JobDetailsPage />
                     </ProtectedRoute>
-                } />
+                }
+                />
+                <Route path="/applications/:applicationId" element={
+                    <ProtectedRoute allowedRoles={['Recruiter', 'Reviewer']}>
+                        <ApplicationReviewPage />
+                    </ProtectedRoute>
+                }
+                />
                 <Route path="/" element={<Navigate to="/login" replace />} />
             </Routes>
         </BrowserRouter>

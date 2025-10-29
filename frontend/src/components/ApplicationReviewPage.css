@@ -1,0 +1,103 @@
+.review-page-container {
+    width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: sans-serif;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.review-header h1 { color: #111827; margin: 0; }
+.review-header a { color: #4f46e5; text-decoration: none; font-weight: 500; }
+
+.past-activity-notification {
+    background-color: #fffbeb;
+    color: #b45309;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #fcd34d;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+}
+
+.candidate-info-panel, .comments-panel {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    color: #1a1a1a;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.candidate-info-panel h3, .comments-panel h3 {
+    margin-top: 0; color: #374151;
+    border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem;
+}
+.candidate-info-panel p { color: #6b7280; line-height: 1.6; }
+
+.view-cv-button {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.action-buttons { margin-top: 2rem; }
+.action-buttons button {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    color: #1a1a1a;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.action-buttons .reject-btn {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.comment-form button {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+.comments-log { margin-top: 2rem; }
+.comment-item {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+.comment-text { font-style: italic; margin-top: 0; }
+.comment-meta { font-size: 0.8rem; color: #6b7280; text-align: right; }

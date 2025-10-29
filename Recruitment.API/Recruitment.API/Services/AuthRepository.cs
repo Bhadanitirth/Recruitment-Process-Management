@@ -6,6 +6,10 @@ using Recruitment.API.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using Microsoft.Extensions.Configuration;
 
 namespace Recruitment.API.Services
 {
@@ -36,7 +40,7 @@ namespace Recruitment.API.Services
             if (!string.Equals(user.Role.role_name, request.UserType, StringComparison.OrdinalIgnoreCase))
             {
                 response.Success = false;
-                response.Message = "Invalid credentials for this user type.";
+                response.Message = "Invalid user type for these credentials.";
                 return response;
             }
 
@@ -49,18 +53,18 @@ namespace Recruitment.API.Services
         {
             if (await UserExists(request.Email))
             {
-                return new ServiceResponse<int> { Success = false, Message = "User already exists." };
+                return new ServiceResponse<int> { Success = false, Message = "A user with this email already exists." };
             }
 
-            if (request.Role != "Recruiter" && request.Role != "Interviewer")
+            if (request.Role != "Recruiter" && request.Role != "Interviewer" && request.Role != "Reviewer")
             {
-                return new ServiceResponse<int> { Success = false, Message = "Registration only available for Recruiters and Interviewers." };
+                return new ServiceResponse<int> { Success = false, Message = "Registration only available for Recruiters, Interviewers, and Reviewers." };
             }
 
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.role_name == request.Role);
             if (role == null)
             {
-                return new ServiceResponse<int> { Success = false, Message = "Invalid role specified." };
+                return new ServiceResponse<int> { Success = false, Message = "The specified role does not exist." };
             }
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -77,7 +81,7 @@ namespace Recruitment.API.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return new ServiceResponse<int> { Data = user.user_id, Message = "Registration successful!" };
+            return new ServiceResponse<int> { Data = user.user_id, Message = "Registration successful! You can now log in." };
         }
 
         public async Task<bool> UserExists(string email)
@@ -90,7 +94,7 @@ namespace Recruitment.API.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
-                new Claim(ClaimTypes.Name, user.email),
+                new Claim("email", user.email), 
                 new Claim(ClaimTypes.Role, user.Role.role_name)
             };
 

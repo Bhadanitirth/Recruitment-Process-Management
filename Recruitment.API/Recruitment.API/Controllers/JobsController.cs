@@ -1,49 +1,63 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment.API.DTOs;
+using Recruitment.API.Models; 
 using Recruitment.API.Services;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-[Authorize(Roles = "Recruiter")]
-public class JobsController : ControllerBase
+namespace Recruitment.API.Controllers
 {
-    private readonly IRecruiterRepository _recruiterRepo;
-
-    public JobsController(IRecruiterRepository recruiterRepo)
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize(Roles = "Recruiter")] 
+    public class JobsController : ControllerBase
     {
-        _recruiterRepo = recruiterRepo;
-    }
+        private readonly IRecruiterRepository _recruiterRepo;
 
-    [HttpPost]
-    public async Task<IActionResult> CreateJob(JobCreateDto jobDto)
-    {
-        var response = await _recruiterRepo.CreateJobAsync(jobDto);
-        if (!response.Success)
+        public JobsController(IRecruiterRepository recruiterRepo)
         {
-            return BadRequest(response);
+            _recruiterRepo = recruiterRepo;
         }
-        return Ok(response);
-    }
 
-    [HttpGet]
-    public async Task<IActionResult> GetJobs()
-    {
-        var response = await _recruiterRepo.GetJobsAsync();
-        return Ok(response);
-    }
-
-    [HttpPost("{jobId}/apply")]
-    public async Task<IActionResult> LinkCandidate(int jobId, ApplicationCreateDto appDto)
-    {
-        var response = await _recruiterRepo.LinkCandidateToJobAsync(jobId, appDto);
-        if (!response.Success)
+        [HttpPost]
+        public async Task<IActionResult> CreateJob(JobCreateDto jobDto)
         {
-            return BadRequest(response);
+            var response = await _recruiterRepo.CreateJobAsync(jobDto);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
         }
-        return Ok(response);
+
+        [HttpGet]
+        public async Task<IActionResult> GetJobs()
+        {
+            var response = await _recruiterRepo.GetJobsAsync();
+            return Ok(response);
+        }
+
+        [HttpPost("{jobId}/apply")]
+        public async Task<IActionResult> LinkCandidate(int jobId, ApplicationCreateDto appDto)
+        {
+            var response = await _recruiterRepo.LinkCandidateToJobAsync(jobId, appDto);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpGet("reviewers")]
+        public async Task<IActionResult> GetAvailableReviewers()
+        {
+            var response = await _recruiterRepo.GetAvailableReviewersAsync();
+            return Ok(response);
+        }
+
+        public class AssignReviewerDto { public int ReviewerUserId { get; set; } }
+
+        [HttpPost("{jobId}/reviewers")]
+        public async Task<IActionResult> AssignReviewer(int jobId, AssignReviewerDto dto)
+        {
+            var response = await _recruiterRepo.AssignReviewerToJobAsync(jobId, dto.ReviewerUserId);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
     }
 }
-
 
