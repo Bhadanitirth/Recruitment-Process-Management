@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import ScheduleInterviewModal from './ScheduleInterviewModal';
 import './ApplicationReviewPage.css';
 
 function ApplicationReviewPage() {
@@ -9,8 +10,10 @@ function ApplicationReviewPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [newComment, setNewComment] = useState('');
+    const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
 
     const fetchDetails = useCallback(async () => {
+
         const token = localStorage.getItem('token');
         try {
             setLoading(true);
@@ -30,6 +33,7 @@ function ApplicationReviewPage() {
     }, [fetchDetails]);
 
     const handleAddComment = async (e) => {
+
         e.preventDefault();
         if (!newComment.trim()) return;
         const token = localStorage.getItem('token');
@@ -46,6 +50,7 @@ function ApplicationReviewPage() {
     };
 
     const handleStatusUpdate = async (newStatus) => {
+
         if (!window.confirm(`Are you sure you want to change the status to "${newStatus}"?`)) return;
         const token = localStorage.getItem('token');
         try {
@@ -62,6 +67,17 @@ function ApplicationReviewPage() {
     if (loading) return <div className="review-page-container">Loading...</div>;
     if (error) return <div className="review-page-container error-message">{error}</div>;
     if (!details) return null;
+
+
+    const applicationForModal = {
+        application_id: details.applicationId,
+        job_id: details.jobId,
+        candidate: {
+            first_name: details.candidateName?.split(' ')[0],
+            last_name: details.candidateName?.split(' ').slice(1).join(' ')
+        }
+    };
+
 
     return (
         <div className="review-page-container">
@@ -82,10 +98,16 @@ function ApplicationReviewPage() {
                     <p><strong>Name:</strong> {details.candidateName}</p>
                     <p><strong>Email:</strong> {details.candidateEmail}</p>
                     <p><strong>Current Status:</strong> <span className={`status-badge status-${details.applicationStatus.toLowerCase()}`}>{details.applicationStatus}</span></p>
-                    <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
+                    {details.candidateCvPath &&
+                        <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
+                    }
+
 
                     <div className="action-buttons">
                         <h3>Actions</h3>
+                        {details.applicationStatus === 'Shortlisted' && (
+                            <button onClick={() => setScheduleModalOpen(true)}>Schedule Interview</button>
+                        )}
                         <button onClick={() => handleStatusUpdate('Shortlisted')}>Shortlist</button>
                         <button onClick={() => handleStatusUpdate('On Hold')}>On Hold</button>
                         <button className="reject-btn" onClick={() => handleStatusUpdate('Rejected')}>Reject</button>
@@ -113,8 +135,16 @@ function ApplicationReviewPage() {
                     </div>
                 </div>
             </div>
+
+            <ScheduleInterviewModal
+                isOpen={isScheduleModalOpen}
+                onClose={() => setScheduleModalOpen(false)}
+                application={applicationForModal}
+                onInterviewScheduled={fetchDetails}
+            />
         </div>
     );
 }
 
 export default ApplicationReviewPage;
+

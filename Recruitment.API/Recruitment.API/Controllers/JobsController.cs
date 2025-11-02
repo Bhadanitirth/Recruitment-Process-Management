@@ -58,6 +58,21 @@ namespace Recruitment.API.Controllers
             if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
+
+        [HttpGet("interviewers")] 
+        public async Task<IActionResult> GetAvailableInterviewers()
+        {
+            var response = await _recruiterRepo.GetAvailableInterviewersAsync();
+            return Ok(response);
+        }
+
+        [HttpPost("{jobId}/interviewers")]
+        public async Task<IActionResult> AssignInterviewer(int jobId, AssignReviewerDto dto) 
+        {
+            var response = await _recruiterRepo.AssignInterviewerToJobAsync(jobId, dto.ReviewerUserId); 
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
     }
 }
 

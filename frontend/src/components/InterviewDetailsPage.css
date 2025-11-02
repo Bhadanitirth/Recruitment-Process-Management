@@ -1,0 +1,173 @@
+.interview-details-container {
+    width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: sans-serif;
+    background-color: #f9fafb;
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.details-header h1 {
+    color: #111827;
+    margin: 0;
+}
+
+.details-header a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+}
+.details-header a:hover { text-decoration: underline; }
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.candidate-job-info, .feedback-form-panel {
+    background-color: #ffffff;
+    color: #6b7280;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.candidate-job-info h3, .feedback-form-panel h3 {
+    margin-top: 0;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.candidate-job-info p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0.5rem 0;
+}
+
+.view-cv-button {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+.view-cv-button:hover { background-color: #4338ca; }
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group select, .form-group textarea, .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.feedback-form-panel button[type="submit"] {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.feedback-form-panel button[type="submit"]:hover {
+    background-color: #059669;
+}
+.feedback-form-panel button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+.status-scheduled { background-color: #3b82f6; }
+.status-completed { background-color: #10b981; }
+.status-cancelled { background-color: #ef4444; }
+
+.error-message { color: #ef4444; }
+
+.submitted-feedback {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.submitted-feedback h4 {
+    margin-top: 0;
+    color: #111827;
+}
+
+.submitted-feedback .comments-box {
+    background-color: #ffffff;
+    border: 1px dashed #d1d5db;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-style: italic;
+    color: #374151;
+}
+
+.submitted-feedback .submitted-at {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+.rec-proceed {
+    font-weight: bold;
+    color: #059669;
+}
+.rec-hold {
+    font-weight: bold;
+    color: #d97706;
+}
+.rec-reject {
+    font-weight: bold;
+    color: #dc2626;
+}
+
+.panel-list {
+    list-style-type: disc;
+    padding-left: 20px;
+    color: #6b7280;
+}
+
