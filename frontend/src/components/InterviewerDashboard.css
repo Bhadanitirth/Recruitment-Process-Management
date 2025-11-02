@@ -1,0 +1,96 @@
+.interviewer-dashboard-container {
+    width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: sans-serif;
+    background-color: #f9fafb;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+}
+
+.dashboard-header h1 {
+    color: #111827;
+    margin: 0;
+}
+
+.interviewer-info-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    color: #374151;
+}
+
+.assigned-interviews-section {
+    margin-top: 2rem;
+}
+
+.assigned-interviews-section h2 {
+    font-size: 1.5rem;
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.interview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.interview-list li {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.interview-list li a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.interview-list li a:hover {
+    text-decoration: underline;
+}
+
+.interview-list li div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+.status-scheduled { background-color: #3b82f6; }
+.status-completed { background-color: #10b981; }
+.status-cancelled { background-color: #ef4444; }
+
+.logout-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #ef4444;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.logout-button:hover { background-color: #dc2626; }
+.error-message { color: #ef4444; }

@@ -84,8 +84,8 @@ function ReviewerDashboard() {
                                     <strong>{app.candidateName}</strong> for {app.jobTitle}
                                 </Link>
                                 <span className={`status-badge status-${app.status.toLowerCase().replace(' ', '-')}`}>
-  {app.status}
-</span>
+                                  {app.status}
+                                </span>
                             </li>
                         ))}
                     </ul>
