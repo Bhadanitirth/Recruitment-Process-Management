@@ -35,7 +35,6 @@ namespace Recruitment.API.Services
             _logger.LogError("User ID claim not found or invalid in token for CandidateRepository.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
-
         public async Task<ServiceResponse<List<MyApplicationDto>>> GetMyApplicationsAsync()
         {
             _logger.LogInformation("Fetching applications for user ID {UserId}", GetCurrentUserId());
@@ -53,15 +52,15 @@ namespace Recruitment.API.Services
 
                 var applicationsWithInterviews = await _context.Applications
                     .Where(a => a.candidate_id == candidate.candidate_id)
-                    .Include(a => a.Job)      
-                    .Include(a => a.Interviews) 
+                    .Include(a => a.Job)
+                    .Include(a => a.Interviews)
                     .OrderByDescending(a => a.applied_at)
-                    .ToListAsync(); 
-
+                    .ToListAsync();
+                
                 var applicationDtos = applicationsWithInterviews.Select(a => {
-                    var latestInterview = a.Interviews? 
+                    var latestInterview = a.Interviews?
                                            .OrderByDescending(i => i.scheduled_at ?? DateTime.MinValue)
-                                           .FirstOrDefault(); 
+                                           .FirstOrDefault();
 
                     return new MyApplicationDto
                     {
@@ -71,7 +70,9 @@ namespace Recruitment.API.Services
                         AppliedAt = a.applied_at,
                         NextStepType = latestInterview?.interview_type,
                         NextStepScheduledAt = latestInterview?.scheduled_at,
-                        NextStepStatus = latestInterview?.status
+                        NextStepStatus = latestInterview?.status,
+
+                        JoiningDate = a.joining_date
                     };
                 }).ToList();
 
@@ -126,4 +127,3 @@ namespace Recruitment.API.Services
         #endregion
     }
 }
-

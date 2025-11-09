@@ -1,0 +1,115 @@
+.doc-management-container {
+    width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: sans-serif;
+    background-color: #f9fafb;
+}
+
+.doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.doc-header h1 { color: #111827; margin: 0; }
+.doc-header a { color: #4f46e5; text-decoration: none; font-weight: 500; }
+
+.doc-section {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    color: #1a1a1a;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-top: 1.5rem;
+}
+.doc-section h3 {
+    margin-top: 0;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.upload-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: 1rem 0;
+}
+.upload-form select, .upload-form input {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+}
+.upload-form button {
+    padding: 0.5rem 1rem;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.doc-list { margin-top: 1rem; }
+
+.doc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+.doc-row:last-child { border-bottom: none; }
+.doc-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.doc-type { font-size: 1.1rem; font-weight: 500; color: #111827; }
+.doc-uploader { font-size: 0.8rem; color: #6b7280; }
+.doc-status { font-size: 0.9rem; font-weight: 500; }
+
+.doc-actions { display: flex; gap: 0.5rem; }
+.doc-btn {
+    padding: 0.4rem 0.8rem;
+    text-decoration: none;
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+}
+.doc-btn.verify { background-color: #10b981; color: white; }
+.doc-btn.reject { background-color: #ef4444; color: white; }
+
+.hr-finalize-section {
+    border-top: 2px solid #e5e7eb;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+}
+.hr-finalize-section h4 { margin-top: 0; font-size: 1.25rem; color: #111827; }
+
+.offer-letter-download {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+}
+.offer-letter-download h4 { color: #15803d; margin-top: 0; }
+.offer-letter-download .doc-btn { background-color: #22c55e; color: white; }
+
+.status-pending { color: #f59e0b; }
+.status-verified { color: #22c55e; }
+.status-rejected { color: #ef4444; }
+.error-message { color: #ef4444; }
+
+.doc-list-section {
+    margin-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+}
+
+.doc-list-section h4 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}

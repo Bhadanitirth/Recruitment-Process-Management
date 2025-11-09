@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-// Add FiEdit3 for Reviewer icon
 import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiPhone, FiEdit3 } from "react-icons/fi";
 import "./SignupPage.css";
 import signupImage from "../../assets/login-illustration.png";
@@ -59,10 +58,11 @@ function SignupPage() {
                     showName: true,
                     showRoleDropdown: false,
                 };
-            default: // Default case
+            default:
                 return {};
         }
     };
+
 
     const handleSignup = async (e) => {
         e.preventDefault();
@@ -73,24 +73,26 @@ function SignupPage() {
             return;
         }
 
+        let roleToSend;
+        if (activeTab === 'Interviewer') {
+            roleToSend = (role === 'hr') ? "HR" : "Interviewer";
+        } else {
+            roleToSend = activeTab;
+        }
+
         try {
             const response = await axios.post('http://localhost:5256/api/auth/register', {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
                 password: password,
-                role: activeTab
+                role: roleToSend
             });
 
             alert(response.data.message);
             navigate('/login');
 
         } catch (err) {
-            if (err.response && err.response.data) {
-                setError(err.response.data.message || 'Registration failed.');
-            } else {
-                setError('An unknown error occurred. Is the backend server running?');
-            }
         }
     };
 
@@ -153,7 +155,7 @@ function SignupPage() {
                                             <input
                                                 type="radio"
                                                 name="role"
-                                                value="hr" // Corresponds to HR role in backend?
+                                                value="hr"
                                                 checked={role === "hr"}
                                                 onChange={(e) => setRole(e.target.value)}
                                                 className="signup-form__radio-input"

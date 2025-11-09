@@ -11,12 +11,10 @@ function ApplicationReviewPage() {
     const [error, setError] = useState('');
     const [newComment, setNewComment] = useState('');
     const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
-
     const fetchDetails = useCallback(async () => {
-
         const token = localStorage.getItem('token');
         try {
-            setLoading(true);
+            setLoading((prevLoading) => !details);
             const response = await axios.get(`http://localhost:5256/api/applications/${applicationId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -33,7 +31,6 @@ function ApplicationReviewPage() {
     }, [fetchDetails]);
 
     const handleAddComment = async (e) => {
-
         e.preventDefault();
         if (!newComment.trim()) return;
         const token = localStorage.getItem('token');
@@ -50,12 +47,12 @@ function ApplicationReviewPage() {
     };
 
     const handleStatusUpdate = async (newStatus) => {
-
         if (!window.confirm(`Are you sure you want to change the status to "${newStatus}"?`)) return;
+
         const token = localStorage.getItem('token');
         try {
             await axios.put(`http://localhost:5256/api/applications/${applicationId}/status`,
-                { newStatus },
+                { newStatus: newStatus },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
             fetchDetails();
@@ -64,10 +61,58 @@ function ApplicationReviewPage() {
         }
     };
 
+    const renderActionButtons = () => {
+        if (!details) return null;
+        const status = details.applicationStatus;
+
+        switch (status) {
+            case 'Applied':
+            case 'Screening':
+                return (
+                    <>
+                        <button onClick={() => handleStatusUpdate('Shortlisted')}>Shortlist</button>
+                        <button onClick={() => handleStatusUpdate('On Hold')}>On Hold</button>
+                        <button className="reject-btn" onClick={() => handleStatusUpdate('Rejected')}>Reject</button>
+                    </>
+                );
+
+            case 'On Hold':
+                return (
+                    <>
+                        <button onClick={() => handleStatusUpdate('Shortlisted')}>Re-activate (Shortlist)</button>
+                        <button className="reject-btn" onClick={() => handleStatusUpdate('Rejected')}>Reject</button>
+                    </>
+                );
+
+            case 'Shortlisted':
+                return (
+                    <button onClick={() => setScheduleModalOpen(true)} className="schedule-btn">
+                        Schedule Interview
+                    </button>
+                );
+
+            case 'Interview':
+                return (
+                    <div className="interview-details-box">
+                        <h4>Interview Scheduled</h4>
+                        <p><strong>Type:</strong> {details.latestInterviewType || 'N/A'}</p>
+                        <p><strong>When:</strong> {details.latestInterviewScheduledAt ? new Date(details.latestInterviewScheduledAt).toLocaleString() : 'N/A'}</p>
+                        <p><strong>Status:</strong> <span className={`status-badge status-${details.latestInterviewStatus?.toLowerCase()}`}>{details.latestInterviewStatus || 'N/A'}</span></p>
+                    </div>
+                );
+
+            case 'Rejected':
+            case 'Hired':
+                return <p>No further review actions for this status.</p>;
+
+            default:
+                return null;
+        }
+    };
+
     if (loading) return <div className="review-page-container">Loading...</div>;
     if (error) return <div className="review-page-container error-message">{error}</div>;
     if (!details) return null;
-
 
     const applicationForModal = {
         application_id: details.applicationId,
@@ -77,7 +122,6 @@ function ApplicationReviewPage() {
             last_name: details.candidateName?.split(' ').slice(1).join(' ')
         }
     };
-
 
     return (
         <div className="review-page-container">
@@ -97,20 +141,16 @@ function ApplicationReviewPage() {
                     <h3>Candidate Details</h3>
                     <p><strong>Name:</strong> {details.candidateName}</p>
                     <p><strong>Email:</strong> {details.candidateEmail}</p>
-                    <p><strong>Current Status:</strong> <span className={`status-badge status-${details.applicationStatus.toLowerCase()}`}>{details.applicationStatus}</span></p>
-                    {details.candidateCvPath &&
+                    <p><strong>Current Status:</strong> <span className={`status-badge status-${details.applicationStatus.toLowerCase().replace(' ', '-')}`}>{details.applicationStatus}</span></p>
+                    {details.candidateCvPath ? (
                         <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
-                    }
-
+                    ) : (
+                        <p className="error-message">CV not yet uploaded.</p>
+                    )}
 
                     <div className="action-buttons">
                         <h3>Actions</h3>
-                        {details.applicationStatus === 'Shortlisted' && (
-                            <button onClick={() => setScheduleModalOpen(true)}>Schedule Interview</button>
-                        )}
-                        <button onClick={() => handleStatusUpdate('Shortlisted')}>Shortlist</button>
-                        <button onClick={() => handleStatusUpdate('On Hold')}>On Hold</button>
-                        <button className="reject-btn" onClick={() => handleStatusUpdate('Rejected')}>Reject</button>
+                        {renderActionButtons()}
                     </div>
                 </div>
 
@@ -147,4 +187,3 @@ function ApplicationReviewPage() {
 }
 
 export default ApplicationReviewPage;
-

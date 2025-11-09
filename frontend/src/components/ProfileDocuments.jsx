@@ -51,7 +51,6 @@ function ProfileDocuments() {
                 }
             });
             setUploadMessage(response.data.message);
-            // Refresh the profile data to show the change
             fetchProfile();
         } catch (err) {
             setError(err.response?.data?.message || 'Upload failed.');
@@ -75,7 +74,6 @@ function ProfileDocuments() {
             <div className="documents-section">
                 <h3>Curriculum Vitae (CV)</h3>
 
-                {/* --- Conditional UI Logic --- */}
                 {!profile.cvPath ? (
                     <div className="upload-section">
                         <p className="status-warning">Your CV is not on file. Please upload it.</p>
@@ -87,12 +85,6 @@ function ProfileDocuments() {
                 ) : (
                     <div className="upload-section">
                         <p className="status-success">Your CV has been uploaded successfully.</p>
-                        {/* Placeholder for future document uploads */}
-                        <div className="submit-docs-placeholder">
-                            <h4>Submit Other Documents</h4>
-                            <p>This feature will be available soon.</p>
-                            <button disabled>Submit Documents</button>
-                        </div>
                     </div>
                 )}
                 {uploadMessage && <p>{uploadMessage}</p>}

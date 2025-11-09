@@ -33,17 +33,13 @@ namespace Recruitment.API.Services
             _logger.LogError("User ID claim not found or invalid in token for InterviewerRepository.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
-
-        // --- UPDATED METHOD: SubmitFeedbackAsync ---
         public async Task<ServiceResponse<InterviewFeedback>> SubmitFeedbackAsync(int interviewId, FeedbackSubmitDto feedbackDto)
         {
             var interviewerId = GetCurrentUserId();
 
-            // Verify the interviewer is assigned to this interview
             if (!await _context.Interview_Panel.AnyAsync(ip => ip.interview_id == interviewId && ip.interviewer_user_id == interviewerId))
                 return new ServiceResponse<InterviewFeedback> { Success = false, Message = "You are not assigned to this interview." };
 
-            // Check if feedback already submitted by this interviewer for this interview
             if (await _context.Interview_Feedback.AnyAsync(f => f.interview_id == interviewId && f.interviewer_user_id == interviewerId))
                 return new ServiceResponse<InterviewFeedback> { Success = false, Message = "Feedback already submitted for this interview." };
 
@@ -52,30 +48,29 @@ namespace Recruitment.API.Services
                 interview_id = interviewId,
                 interviewer_user_id = interviewerId,
                 rating = feedbackDto.Rating,
-                // --- THIS IS THE FIX ---
-                // Changed from lowercase 'comments' to uppercase 'Comments' to match the DTO
                 comments = feedbackDto.Comments,
-                // --- END OF FIX ---
                 recommendation = feedbackDto.Recommendation
             };
 
             _context.Interview_Feedback.Add(feedback);
 
             var interview = await _context.Interviews.FindAsync(interviewId);
-            if (interview != null) interview.status = "Completed"; // This is the line that changes the status
-
-            await _context.SaveChangesAsync(); // Save feedback and interview status change
-
-            // Update application status after saving feedback
-            if (interview != null && (feedback.recommendation == "Hold" || feedback.recommendation == "Reject"))
+            if (interview != null)
             {
-                var application = await _context.Applications.FindAsync(interview.application_id);
-                if (application != null)
+                interview.status = "Completed";
+
+                 if (feedback.recommendation == "Hold" || feedback.recommendation == "Reject")
                 {
-                    application.status = (feedback.recommendation == "Hold") ? "On Hold" : "Rejected";
-                    await _context.SaveChangesAsync();
+                    var application = await _context.Applications.FindAsync(interview.application_id);
+                    if (application != null)
+                    {
+                        application.status = (feedback.recommendation == "Hold") ? "On Hold" : "Rejected";
+                    }
                 }
             }
+
+            await _context.SaveChangesAsync();
+
             return new ServiceResponse<InterviewFeedback> { Data = feedback, Message = "Feedback submitted." };
         }
 
@@ -95,7 +90,7 @@ namespace Recruitment.API.Services
                 {
                     InterviewId = ip.interview_id,
                     CandidateName = ip.Interview.Application.Candidate != null ? $"{ip.Interview.Application.Candidate.first_name} {ip.Interview.Application.Candidate.last_name}" : "N/A",
-                    JobTitle = ip.Interview.Application.Job != null ? ip.Interview.Application.Job.title : "N/A",
+                    JobTitle = ip.Interview.Application.Job != null ? ip.Interview.Application.Job.title : "N/Player",
                     InterviewType = ip.Interview.interview_type,
                     ScheduledAt = ip.Interview.scheduled_at ?? default,
                     Status = ip.Interview.status
@@ -173,4 +168,3 @@ namespace Recruitment.API.Services
         #endregion
     }
 }
-

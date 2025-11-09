@@ -12,7 +12,6 @@ using ClosedXML.Excel;
 using System;
 using Microsoft.Extensions.Logging;
 
-
 namespace Recruitment.API.Services
 {
     public class RecruiterRepository : IRecruiterRepository
@@ -20,11 +19,12 @@ namespace Recruitment.API.Services
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<RecruiterRepository> _logger;
+
         public RecruiterRepository(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<RecruiterRepository> logger)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
-            _logger = logger; 
+            _logger = logger;
         }
 
         private int GetUserId()
@@ -33,46 +33,56 @@ namespace Recruitment.API.Services
             {
                 return userId;
             }
-            _logger.LogError("User ID claim not found or invalid in token."); 
+            _logger.LogError("User ID claim not found or invalid in token.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
 
-        public async Task<ServiceResponse<List<UserDto>>> GetAvailableInterviewersAsync()
+        public async Task<ServiceResponse<Interview>> ScheduleInterviewAsync(InterviewScheduleDto scheduleDto)
         {
-            _logger.LogInformation("Attempting to fetch available interviewers."); 
-            try
-            {
-                var interviewerRole = await _context.Roles.FirstOrDefaultAsync(r => r.role_name.Equals("Interviewer", StringComparison.OrdinalIgnoreCase));
+            var application = await _context.Applications.FindAsync(scheduleDto.ApplicationId);
+            if (application == null)
+                return new ServiceResponse<Interview> { Success = false, Message = "Application not found." };
 
-                if (interviewerRole == null)
+            if (string.IsNullOrEmpty(scheduleDto.InterviewType) || scheduleDto.InterviewerIds == null || !scheduleDto.InterviewerIds.Any())
+            {
+                return new ServiceResponse<Interview> { Success = false, Message = "Interview type and at least one interviewer are required." };
+            }
+
+            var interview = new Interview
+            {
+                application_id = scheduleDto.ApplicationId,
+                round_number = scheduleDto.RoundNumber,
+                interview_type = scheduleDto.InterviewType,
+                scheduled_at = scheduleDto.ScheduledAt,
+                status = "Scheduled"
+            };
+            _context.Interviews.Add(interview);
+            await _context.SaveChangesAsync(); 
+
+            foreach (var interviewerId in scheduleDto.InterviewerIds)
+            {
+                var isValidInterviewer = await _context.Users
+                                               .Include(u => u.Role)
+                                               .AnyAsync(u => u.user_id == interviewerId && u.Role.role_name.Equals("Interviewer", StringComparison.OrdinalIgnoreCase));
+                if (!isValidInterviewer)
                 {
-                    _logger.LogError("Role definition for 'Interviewer' not found in Roles table."); 
-                    return new ServiceResponse<List<UserDto>> { Success = false, Message = "Interviewer role definition not found." };
+                    _logger.LogWarning($"Warning: User ID {interviewerId} is not a valid interviewer. Skipping assignment to interview {interview.interview_id}.");
+                    continue;
                 }
-                _logger.LogInformation("Found 'Interviewer' role with ID: {RoleId}", interviewerRole.role_id); 
 
-                var interviewers = await _context.Users
-                    .Where(u => u.role_id == interviewerRole.role_id)
-                    .OrderBy(u => u.first_name)
-                    .ThenBy(u => u.last_name)
-                    .Select(u => new UserDto
-                    {
-                        UserId = u.user_id,
-                        Name = $"{u.first_name} {u.last_name}",
-                        Email = u.email
-                    })
-                    .ToListAsync();
+                _context.Interview_Panel.Add(new InterviewPanel
+                {
+                    interview_id = interview.interview_id,
+                    interviewer_user_id = interviewerId
+                });
+            }
 
-                _logger.LogInformation("Successfully fetched {Count} interviewers.", interviewers.Count); 
-                return new ServiceResponse<List<UserDto>> { Data = interviewers };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An exception occurred while fetching available interviewers.");
-                return new ServiceResponse<List<UserDto>> { Success = false, Message = "An error occurred while fetching interviewers." };
-            }
+            application.status = "Interview";
+
+            await _context.SaveChangesAsync(); 
+
+            return new ServiceResponse<Interview> { Data = interview, Message = "Interview scheduled successfully." };
         }
-
 
         #region Unchanged Methods
         public async Task<ServiceResponse<List<Application>>> GetApplicationsAsync()
@@ -80,7 +90,7 @@ namespace Recruitment.API.Services
             var response = new ServiceResponse<List<Application>>
             {
                 Data = await _context.Applications
-                                     .Include(a => a.Candidate) 
+                                     .Include(a => a.Candidate)
                                      .ToListAsync()
             };
             return response;
@@ -88,10 +98,34 @@ namespace Recruitment.API.Services
 
         public async Task<ServiceResponse<List<UserDto>>> GetAvailableReviewersAsync()
         {
-            var reviewerRole = await _context.Roles.FirstOrDefaultAsync(r => r.role_name.Equals("Reviewer", StringComparison.OrdinalIgnoreCase));
-            if (reviewerRole == null) { return new ServiceResponse<List<UserDto>> { Success = false, Message = "Reviewer role definition not found." }; }
-            var reviewers = await _context.Users.Where(u => u.role_id == reviewerRole.role_id).Select(u => new UserDto { UserId = u.user_id, Name = $"{u.first_name} {u.last_name}", Email = u.email }).ToListAsync();
-            return new ServiceResponse<List<UserDto>> { Data = reviewers };
+            _logger.LogInformation("Attempting to fetch available reviewers.");
+            try
+            {
+                var reviewerRole = await _context.Roles.FirstOrDefaultAsync(r => r.role_name.Equals("Reviewer", StringComparison.OrdinalIgnoreCase));
+                if (reviewerRole == null)
+                {
+                    _logger.LogError("Role definition for 'Reviewer' not found in Roles table.");
+                    return new ServiceResponse<List<UserDto>> { Success = false, Message = "Reviewer role definition not found." };
+                }
+                _logger.LogInformation("Found 'Reviewer' role with ID: {RoleId}", reviewerRole.role_id);
+                var reviewers = await _context.Users
+                    .Where(u => u.role_id == reviewerRole.role_id)
+                    .OrderBy(u => u.first_name).ThenBy(u => u.last_name) 
+                    .Select(u => new UserDto
+                    {
+                        UserId = u.user_id,
+                        Name = $"{u.first_name} {u.last_name}",
+                        Email = u.email
+                    })
+                    .ToListAsync();
+                _logger.LogInformation("Successfully fetched {Count} reviewers.", reviewers.Count);
+                return new ServiceResponse<List<UserDto>> { Data = reviewers };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An exception occurred while fetching available reviewers.");
+                return new ServiceResponse<List<UserDto>> { Success = false, Message = "An error occurred while fetching reviewers." };
+            }
         }
 
         public async Task<ServiceResponse<JobReviewer>> AssignReviewerToJobAsync(int jobId, int reviewerUserId)
@@ -104,6 +138,38 @@ namespace Recruitment.API.Services
             return new ServiceResponse<JobReviewer> { Data = assignment, Message = "Reviewer assigned successfully." };
         }
 
+        public async Task<ServiceResponse<List<UserDto>>> GetAvailableInterviewersAsync()
+        {
+            _logger.LogInformation("Attempting to fetch available interviewers.");
+            try
+            {
+                var interviewerRole = await _context.Roles.FirstOrDefaultAsync(r => r.role_name.Equals("Interviewer", StringComparison.OrdinalIgnoreCase));
+                if (interviewerRole == null)
+                {
+                    _logger.LogError("Role definition for 'Interviewer' not found in Roles table.");
+                    return new ServiceResponse<List<UserDto>> { Success = false, Message = "Interviewer role definition not found." };
+                }
+                _logger.LogInformation("Found 'Interviewer' role with ID: {RoleId}", interviewerRole.role_id);
+                var interviewers = await _context.Users
+                    .Where(u => u.role_id == interviewerRole.role_id)
+                    .OrderBy(u => u.first_name).ThenBy(u => u.last_name) 
+                    .Select(u => new UserDto
+                    {
+                        UserId = u.user_id,
+                        Name = $"{u.first_name} {u.last_name}",
+                        Email = u.email
+                    })
+                    .ToListAsync();
+                _logger.LogInformation("Successfully fetched {Count} interviewers.", interviewers.Count);
+                return new ServiceResponse<List<UserDto>> { Data = interviewers };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An exception occurred while fetching available interviewers.");
+                return new ServiceResponse<List<UserDto>> { Success = false, Message = "An error occurred while fetching interviewers." };
+            }
+        }
+
         public async Task<ServiceResponse<JobInterviewer>> AssignInterviewerToJobAsync(int jobId, int interviewerUserId)
         {
             if (!await _context.Jobs.AnyAsync(j => j.job_id == jobId)) return new ServiceResponse<JobInterviewer> { Success = false, Message = "Job not found." };
@@ -112,17 +178,6 @@ namespace Recruitment.API.Services
             if (await _context.Job_Interviewers.AnyAsync(ji => ji.job_id == jobId && ji.interviewer_user_id == interviewerUserId)) return new ServiceResponse<JobInterviewer> { Success = false, Message = "Interviewer already assigned to this job." };
             var assignment = new JobInterviewer { job_id = jobId, interviewer_user_id = interviewerUserId }; _context.Job_Interviewers.Add(assignment); await _context.SaveChangesAsync();
             return new ServiceResponse<JobInterviewer> { Data = assignment, Message = "Interviewer assigned." };
-        }
-
-        public async Task<ServiceResponse<Interview>> ScheduleInterviewAsync(InterviewScheduleDto scheduleDto)
-        {
-            var application = await _context.Applications.FindAsync(scheduleDto.ApplicationId); if (application == null) return new ServiceResponse<Interview> { Success = false, Message = "Application not found." };
-            if (string.IsNullOrEmpty(scheduleDto.InterviewType) || scheduleDto.InterviewerIds == null || !scheduleDto.InterviewerIds.Any()) { return new ServiceResponse<Interview> { Success = false, Message = "Interview type and at least one interviewer are required." }; }
-            var interview = new Interview { application_id = scheduleDto.ApplicationId, round_number = scheduleDto.RoundNumber, interview_type = scheduleDto.InterviewType, scheduled_at = scheduleDto.ScheduledAt, status = "Scheduled" };
-            _context.Interviews.Add(interview); await _context.SaveChangesAsync();
-            foreach (var interviewerId in scheduleDto.InterviewerIds) { var isValidInterviewer = await _context.Users.Include(u => u.Role).AnyAsync(u => u.user_id == interviewerId && u.Role.role_name.Equals("Interviewer", StringComparison.OrdinalIgnoreCase)); if (!isValidInterviewer) { Console.WriteLine($"Warning: User ID {interviewerId} is not a valid interviewer. Skipping assignment to interview {interview.interview_id}."); continue; } _context.Interview_Panel.Add(new InterviewPanel { interview_id = interview.interview_id, interviewer_user_id = interviewerId }); }
-            await _context.SaveChangesAsync();
-            return new ServiceResponse<Interview> { Data = interview, Message = "Interview scheduled successfully." };
         }
 
         public async Task<ServiceResponse<Job>> CreateJobAsync(JobCreateDto jobDto) { var job = new Job { title = jobDto.Title, description = jobDto.Description, status = "Open", created_by_user_id = GetUserId() }; _context.Jobs.Add(job); await _context.SaveChangesAsync(); if (jobDto.RequiredSkillIds != null) { foreach (var skillId in jobDto.RequiredSkillIds) { _context.Job_Skills.Add(new JobSkill { job_id = job.job_id, skill_id = skillId, is_required = true }); } } if (jobDto.PreferredSkillIds != null) { foreach (var skillId in jobDto.PreferredSkillIds) { _context.Job_Skills.Add(new JobSkill { job_id = job.job_id, skill_id = skillId, is_required = false }); } } await _context.SaveChangesAsync(); return new ServiceResponse<Job> { Data = job, Message = "Job with skills created." }; }
@@ -137,4 +192,3 @@ namespace Recruitment.API.Services
         #endregion
     }
 }
-

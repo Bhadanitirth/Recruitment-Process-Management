@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './CandidateDashboard.css';
 import ProfileDocuments from './ProfileDocuments';
 
 function JobListing() {
+    // ... (This component is unchanged) ...
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -18,7 +19,7 @@ function JobListing() {
                 });
                 setJobs(response.data.data || []);
             } catch (err) {
-                console.error("Error fetching jobs:", err); // Log error
+                console.error("Error fetching jobs:", err);
                 setError('Could not load job listings.');
             } finally {
                 setLoading(false);
@@ -36,9 +37,7 @@ function JobListing() {
             {jobs.length > 0 ? jobs.map(job => (
                 <div key={job.jobId} className="job-card">
                     <h3>{job.title}</h3>
-
                     <p>{job.description ? job.description.substring(0, 150) + '...' : 'No description available.'}</p>
-
                 </div>
             )) : <p>No open positions at the moment.</p>}
         </div>
@@ -82,6 +81,18 @@ function MyApplications() {
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+        } catch (e) {
+            return 'Invalid Date';
+        }
+    };
+
+
     return (
         <div className="applications-container">
             <h2>My Application Status</h2>
@@ -91,16 +102,15 @@ function MyApplications() {
                     <tr>
                         <th>Job Title</th>
                         <th>Application Status</th>
-                        <th>Applied On</th>
                         <th>Next Step Details</th>
+                        <th>Documents / Joining Date</th>
                     </tr>
                     </thead>
                     <tbody>
                     {applications.map(app => (
                         <tr key={app.applicationId}>
                             <td>{app.jobTitle}</td>
-                            <td><span className={`status-badge status-${app.applicationStatus?.toLowerCase()}`}>{app.applicationStatus}</span></td>
-                            <td>{formatDateTime(app.appliedAt)}</td>
+                            <td><span className={`status-badge status-${app.applicationStatus?.toLowerCase().replace(' ', '-')}`}>{app.applicationStatus}</span></td>
                             <td>
                                 {app.nextStepType ? (
                                     <div>
@@ -112,6 +122,21 @@ function MyApplications() {
                                     "Pending Review"
                                 )}
                             </td>
+
+                            <td>
+                                {app.applicationStatus === 'Hired' && app.joiningDate ? (
+                                    <div className="joining-date-info">
+                                        <strong>Joining Date:</strong>
+                                        <p>{formatDate(app.joiningDate)}</p>
+                                    </div>
+                                ) : null}
+
+                                {(app.applicationStatus === 'Offered' || app.applicationStatus === 'Hired') && (
+                                    <Link to={`/applications/${app.applicationId}/documents`} className="doc-link-button">
+                                        View/Upload Documents
+                                    </Link>
+                                )}
+                            </td>
                         </tr>
                     ))}
                     </tbody>
@@ -120,6 +145,7 @@ function MyApplications() {
         </div>
     );
 }
+
 
 function CandidateDashboard() {
     const [activeTab, setActiveTab] = useState('jobs');
@@ -136,7 +162,6 @@ function CandidateDashboard() {
                 <h1>My Dashboard</h1>
                 <button onClick={handleLogout} className="logout-button">Logout</button>
             </header>
-
             <nav className="candidate-nav">
                 <button
                     onClick={() => setActiveTab('jobs')}
@@ -157,7 +182,6 @@ function CandidateDashboard() {
                     Profile & Documents
                 </button>
             </nav>
-
             <main className="candidate-content">
                 {activeTab === 'jobs' && <JobListing />}
                 {activeTab === 'applications' && <MyApplications />}
@@ -168,4 +192,3 @@ function CandidateDashboard() {
 }
 
 export default CandidateDashboard;
-

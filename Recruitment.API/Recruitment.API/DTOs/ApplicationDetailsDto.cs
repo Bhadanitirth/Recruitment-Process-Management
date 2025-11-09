@@ -9,5 +9,11 @@
         public string CandidateCvPath { get; set; }
         public List<CommentDto> Comments { get; set; }
         public List<PastApplicationDto> PastApplications { get; set; }
+        public int CurrentUserId { get; set; } 
+        public List<SubmittedFeedbackDto> SubmittedFeedback { get; set; } 
+        public int JobId { get; set; }
+        public string LatestInterviewType { get; set; }
+        public DateTime? LatestInterviewScheduledAt { get; set; }
+        public string LatestInterviewStatus { get; set; }
     }
 }

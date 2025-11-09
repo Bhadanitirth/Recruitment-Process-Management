@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 function MyApplications() {
@@ -44,6 +45,12 @@ function MyApplications() {
                             <td>{app.jobTitle}</td>
                             <td><span className={`status-badge status-${app.applicationStatus.toLowerCase()}`}>{app.applicationStatus}</span></td>
                             <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                            <td> {(app.applicationStatus.toLowerCase() === 'Shortlisted' || app.applicationStatus === 'Offered' || app.applicationStatus === 'Hired') && (
+                                <Link to={`/applications/${app.applicationId}/documents`} className="doc-link-button">
+                                    View/Upload Documents
+                                </Link>
+                            )}
+                            </td>
                         </tr>
                     ))}
                     </tbody>

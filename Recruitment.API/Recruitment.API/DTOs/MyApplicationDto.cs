@@ -12,6 +12,8 @@ namespace Recruitment.API.DTOs
         public string NextStepType { get; set; } 
         public DateTime? NextStepScheduledAt { get; set; }
         public string NextStepStatus { get; set; }
+
+        public DateTime? JoiningDate { get; set; }
     }
 }
 

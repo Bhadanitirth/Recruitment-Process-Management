@@ -8,7 +8,9 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import JobDetailsPage from './components/JobDetailsPage';
 import ApplicationReviewPage from './components/ApplicationReviewPage';
 import ReviewerDashboard from "./components/ReviewerDashboard.jsx";
-import InterviewDetailsPage from "./components/InterviewDetailsPage.jsx"
+import InterviewDetailsPage from "./components/InterviewDetailsPage.jsx";
+import DocumentManagementPage from "./components/DocumentManagementPage.jsx";
+import HRDashboard from "./components/HRDashboard.jsx";
 
 function App() {
     return (
@@ -31,6 +33,10 @@ function App() {
                 <Route path="/recruiter-dashboard" element={
                     <ProtectedRoute allowedRoles={['Recruiter']}> <RecruiterDashboard /> </ProtectedRoute>
                 } />
+                <Route path="/hr-dashboard" element={
+                    <ProtectedRoute allowedRoles={['HR', 'Recruiter']}> <HRDashboard /> </ProtectedRoute>
+                } />
+
                 <Route path="/jobs/:jobId" element={
                     <ProtectedRoute allowedRoles={['Recruiter']}> <JobDetailsPage /> </ProtectedRoute>
                 } />
@@ -39,6 +45,11 @@ function App() {
                 } />
                 <Route path="/interviews/:interviewId" element={
                     <ProtectedRoute allowedRoles={['Interviewer', 'Recruiter']}> <InterviewDetailsPage /> </ProtectedRoute>
+                } />
+                <Route path="/applications/:applicationId/documents" element={
+                    <ProtectedRoute allowedRoles={['Recruiter', 'HR', 'Candidate']}>
+                        <DocumentManagementPage />
+                    </ProtectedRoute>
                 } />
 
                 {/* --- Fallback Route --- */}

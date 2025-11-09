@@ -56,9 +56,9 @@ namespace Recruitment.API.Services
                 return new ServiceResponse<int> { Success = false, Message = "A user with this email already exists." };
             }
 
-            if (request.Role != "Recruiter" && request.Role != "Interviewer" && request.Role != "Reviewer")
+            if (request.Role != "Recruiter" && request.Role != "Interviewer" && request.Role != "Reviewer" && request.Role != "HR")
             {
-                return new ServiceResponse<int> { Success = false, Message = "Registration only available for Recruiters, Interviewers, and Reviewers." };
+                return new ServiceResponse<int> { Success = false, Message = "Registration only available for Recruiters, Interviewers, HR, and Reviewers." };
             }
 
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.role_name == request.Role);

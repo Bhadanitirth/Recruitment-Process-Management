@@ -20,6 +20,7 @@ namespace Recruitment.API.Data
         public DbSet<Interview> Interviews { get; set; }
         public DbSet<InterviewPanel> Interview_Panel { get; set; }
         public DbSet<InterviewFeedback> Interview_Feedback { get; set; }
+        public DbSet<CandidateDocument> Candidate_Documents { get; set; }
     }
 }
 

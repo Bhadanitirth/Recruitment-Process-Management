@@ -101,3 +101,35 @@
 }
 .comment-text { font-style: italic; margin-top: 0; }
 .comment-meta { font-size: 0.8rem; color: #6b7280; text-align: right; }
+
+
+.action-buttons button.schedule-btn {
+    background-color: #10b981;
+    border-color: #059669;
+    color: white;
+}
+.action-buttons button.schedule-btn:hover {
+    background-color: #059669;
+}
+
+.interview-details-box {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: left;
+}
+.interview-details-box h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #111827;
+}
+.interview-details-box p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #374151;
+}
+.interview-details-box .status-badge {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+}
