@@ -17,13 +17,13 @@ namespace Recruitment.API.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<CandidateRepository> _logger; 
+        private readonly ILogger<CandidateRepository> _logger;
 
         public CandidateRepository(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<CandidateRepository> logger)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
-            _logger = logger; 
+            _logger = logger;
         }
 
         private int GetCurrentUserId()
@@ -35,6 +35,8 @@ namespace Recruitment.API.Services
             _logger.LogError("User ID claim not found or invalid in token for CandidateRepository.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
+
+        // --- UPDATED METHOD: GetMyApplicationsAsync ---
         public async Task<ServiceResponse<List<MyApplicationDto>>> GetMyApplicationsAsync()
         {
             _logger.LogInformation("Fetching applications for user ID {UserId}", GetCurrentUserId());
@@ -45,22 +47,29 @@ namespace Recruitment.API.Services
 
                 if (candidate == null)
                 {
-                    _logger.LogWarning("No candidate profile found linked to user ID {UserId}", userId);
                     return new ServiceResponse<List<MyApplicationDto>> { Data = new List<MyApplicationDto>(), Message = "No candidate profile linked to this account." };
                 }
-                _logger.LogInformation("Found candidate profile ID {CandidateId} for user ID {UserId}", candidate.candidate_id, userId);
 
                 var applicationsWithInterviews = await _context.Applications
                     .Where(a => a.candidate_id == candidate.candidate_id)
                     .Include(a => a.Job)
-                    .Include(a => a.Interviews)
+                    .Include(a => a.Interviews) // Include ALL interviews
                     .OrderByDescending(a => a.applied_at)
                     .ToListAsync();
-                
+
                 var applicationDtos = applicationsWithInterviews.Select(a => {
-                    var latestInterview = a.Interviews?
-                                           .OrderByDescending(i => i.scheduled_at ?? DateTime.MinValue)
-                                           .FirstOrDefault();
+
+                    // Map all interviews to the history list
+                    var history = a.Interviews
+                        .OrderBy(i => i.round_number) // Sort by round 1, 2, 3...
+                        .Select(i => new InterviewRoundDto
+                        {
+                            RoundNumber = i.round_number,
+                            InterviewType = i.interview_type,
+                            ScheduledAt = i.scheduled_at,
+                            Status = i.status,
+                            MeetingLink = i.meeting_link
+                        }).ToList();
 
                     return new MyApplicationDto
                     {
@@ -68,37 +77,28 @@ namespace Recruitment.API.Services
                         JobTitle = a.Job?.title ?? "N/A",
                         ApplicationStatus = a.status,
                         AppliedAt = a.applied_at,
-                        NextStepType = latestInterview?.interview_type,
-                        NextStepScheduledAt = latestInterview?.scheduled_at,
-                        NextStepStatus = latestInterview?.status,
+
+                        // --- ASSIGN THE HISTORY ---
+                        InterviewHistory = history,
 
                         JoiningDate = a.joining_date
                     };
                 }).ToList();
 
-
-                _logger.LogInformation("Successfully fetched {Count} applications for candidate ID {CandidateId}", applicationDtos.Count, candidate.candidate_id);
                 return new ServiceResponse<List<MyApplicationDto>> { Data = applicationDtos };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching applications for user ID {UserId}", GetCurrentUserId());
+                _logger.LogError(ex, "Error fetching applications.");
                 return new ServiceResponse<List<MyApplicationDto>> { Success = false, Message = "An error occurred fetching applications." };
             }
         }
 
+        // ... (Unchanged Methods: GetOpenJobsAsync, GetMyProfileAsync, UpdateCvAsync)
         #region Unchanged Methods
         public async Task<ServiceResponse<List<JobListingDto>>> GetOpenJobsAsync()
         {
-            var jobs = await _context.Jobs
-                .Where(j => j.status == "Open")
-                .Select(j => new JobListingDto
-                {
-                    JobId = j.job_id,
-                    Title = j.title,
-                    Description = j.description,
-                    Status = j.status
-                }).ToListAsync();
+            var jobs = await _context.Jobs.Where(j => j.status == "Open").Select(j => new JobListingDto { JobId = j.job_id, Title = j.title, Description = j.description, Status = j.status }).ToListAsync();
             return new ServiceResponse<List<JobListingDto>> { Data = jobs };
         }
         public async Task<ServiceResponse<CandidateProfileDto>> GetMyProfileAsync()

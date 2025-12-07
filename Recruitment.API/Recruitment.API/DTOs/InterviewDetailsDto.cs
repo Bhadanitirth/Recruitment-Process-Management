@@ -14,5 +14,6 @@
         public List<string> PanelInterviewerNames { get; set; }
         public int CurrentUserId { get; set; }
         public List<SubmittedFeedbackDto> SubmittedFeedback { get; set; }
+        public string MeetingLink { get; set; }
     }
 }

@@ -33,7 +33,8 @@ namespace Recruitment.API.Services
             _logger.LogError("User ID claim not found or invalid in token for InterviewerRepository.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
--
+
+        // --- METHOD 1: Get Application Details (Full Implementation) ---
         public async Task<ServiceResponse<ApplicationDetailsDto>> GetApplicationDetailsAsync(int applicationId)
         {
             _logger.LogInformation("Fetching details for application ID {ApplicationId}", applicationId);
@@ -51,18 +52,29 @@ namespace Recruitment.API.Services
 
                 var userRole = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Role);
                 var isRecruiter = userRole == "Recruiter";
-                 var isAssigned = await _context.Job_Reviewers.AnyAsync(jr => jr.job_id == application.job_id && jr.reviewer_user_id == currentUserId);
+                var isAssigned = await _context.Job_Reviewers.AnyAsync(jr => jr.job_id == application.job_id && jr.reviewer_user_id == currentUserId);
 
                 if (!isRecruiter && !isAssigned)
                 {
-                    _logger.LogWarning("Security Breach: User {UserId} (role: {UserRole}) tried to access application {ApplicationId} they are not assigned to.", currentUserId, userRole, applicationId);
+                    _logger.LogWarning("Security Breach: User {UserId} tried to access application {ApplicationId}.", currentUserId, applicationId);
                     return new ServiceResponse<ApplicationDetailsDto> { Success = false, Message = "You are not authorized to view this application." };
                 }
 
-                var latestInterview = await _context.Interviews
+                var allInterviews = await _context.Interviews
                     .Where(i => i.application_id == applicationId)
-                    .OrderByDescending(i => i.scheduled_at) 
-                    .FirstOrDefaultAsync();
+                    .OrderBy(i => i.round_number)
+                    .ToListAsync();
+
+                var interviewHistory = allInterviews.Select(i => new InterviewRoundDto
+                {
+                    RoundNumber = i.round_number,
+                    InterviewType = i.interview_type,
+                    ScheduledAt = i.scheduled_at,
+                    Status = i.status,
+                    MeetingLink = i.meeting_link
+                }).ToList();
+
+                var latestInterview = allInterviews.OrderByDescending(i => i.scheduled_at).FirstOrDefault();
 
                 var comments = await _context.Application_Comments
                                     .Where(c => c.application_id == applicationId)
@@ -73,98 +85,109 @@ namespace Recruitment.API.Services
                                         CommentText = c.comment,
                                         AuthorName = c.User != null ? $"{c.User.first_name} {c.User.last_name}" : "Unknown",
                                         CreatedAt = c.created_at
-                                    })
-                                    .ToListAsync();
+                                    }).ToListAsync();
 
-                var interviewIdsForApp = await _context.Interviews
-                    .Where(i => i.application_id == applicationId)
-                    .Select(i => i.interview_id)
-                    .ToListAsync();
-
+                var interviewIdsForApp = allInterviews.Select(i => i.interview_id).ToList();
                 var submittedFeedback = await _context.Interview_Feedback
-                    .Where(f => interviewIdsForApp.Contains(f.interview_id)) 
-                    .Include(f => f.Interviewer)
-                    .OrderBy(f => f.submitted_at)
-                    .Select(f => new SubmittedFeedbackDto
-                    {
-                        InterviewerName = f.Interviewer != null ? $"{f.Interviewer.first_name} {f.Interviewer.last_name}" : "Unknown",
-                        Rating = f.rating,
-                        Comments = f.comments,
-                        Recommendation = f.recommendation,
-                        SubmittedAt = f.submitted_at,
-                        InterviewerId = f.interviewer_user_id
-                    })
-                    .ToListAsync();
-
-                var pastApplications = await _context.Applications
-                    .Where(a => a.candidate_id == application.candidate_id && a.application_id != applicationId)
-                    .Include(a => a.Job)
-                    .Select(a => new PastApplicationDto
-                    {
-                        JobTitle = a.Job != null ? a.Job.title : "Unknown Job",
-                        FinalStatus = a.status,
-                        AppliedAt = a.applied_at
-                    })
-                    .ToListAsync();
+                   .Where(f => interviewIdsForApp.Contains(f.interview_id))
+                   .Include(f => f.Interviewer)
+                   .OrderBy(f => f.submitted_at)
+                   .Select(f => new SubmittedFeedbackDto
+                   {
+                       InterviewerName = f.Interviewer != null ? $"{f.Interviewer.first_name} {f.Interviewer.last_name}" : "Unknown",
+                       Rating = f.rating,
+                       Comments = f.comments,
+                       Recommendation = f.recommendation,
+                       SubmittedAt = f.submitted_at,
+                       InterviewerId = f.interviewer_user_id
+                   })
+                   .ToListAsync();
 
                 var detailsDto = new ApplicationDetailsDto
                 {
                     ApplicationId = application.application_id,
+                    JobId = application.job_id,
                     ApplicationStatus = application.status,
                     CandidateName = $"{application.Candidate.first_name} {application.Candidate.last_name}",
                     CandidateEmail = application.Candidate.email,
                     CandidateCvPath = application.Candidate.cv_path,
-                    Comments = comments, 
-                    PastApplications = pastApplications,
-                    SubmittedFeedback = submittedFeedback, 
+                    Comments = comments,
+                    PastApplications = new List<PastApplicationDto>(),
+                    SubmittedFeedback = submittedFeedback,
                     CurrentUserId = currentUserId,
-                    JobId = application.job_id,
 
                     LatestInterviewType = latestInterview?.interview_type,
                     LatestInterviewScheduledAt = latestInterview?.scheduled_at,
-                    LatestInterviewStatus = latestInterview?.status
+                    LatestInterviewStatus = latestInterview?.status,
+                    InterviewHistory = interviewHistory
                 };
 
                 return new ServiceResponse<ApplicationDetailsDto> { Data = detailsDto };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching application details for ID {ApplicationId}", applicationId);
-                return new ServiceResponse<ApplicationDetailsDto> { Success = false, Message = "An error occurred while fetching details." };
+                _logger.LogError(ex, "Error fetching details.");
+                return new ServiceResponse<ApplicationDetailsDto> { Success = false, Message = "Error fetching details." };
             }
         }
 
-       #region Unchanged Methods
+        // --- METHOD 2: Get Assigned Applications ---
         public async Task<ServiceResponse<List<ReviewerApplicationDto>>> GetAssignedApplicationsAsync()
         {
             var reviewerId = GetCurrentUserId();
-            var assignedJobIds = await _context.Job_Reviewers.Where(jr => jr.reviewer_user_id == reviewerId).Select(jr => jr.job_id).ToListAsync();
-            if (!assignedJobIds.Any()) { return new ServiceResponse<List<ReviewerApplicationDto>> { Data = new List<ReviewerApplicationDto>() }; }
-            var applications = await _context.Applications.Where(a => assignedJobIds.Contains(a.job_id)).Include(a => a.Candidate).Include(a => a.Job)
+            var assignedJobIds = await _context.Job_Reviewers
+                .Where(jr => jr.reviewer_user_id == reviewerId)
+                .Select(jr => jr.job_id)
+                .ToListAsync();
+
+            if (!assignedJobIds.Any())
+            {
+                return new ServiceResponse<List<ReviewerApplicationDto>> { Data = new List<ReviewerApplicationDto>() };
+            }
+
+            var applications = await _context.Applications
+                .Where(a => assignedJobIds.Contains(a.job_id))
+                .Include(a => a.Candidate)
+                .Include(a => a.Job)
                 .Select(a => new ReviewerApplicationDto
                 {
                     ApplicationId = a.application_id,
                     CandidateName = (a.Candidate != null) ? $"{a.Candidate.first_name} {a.Candidate.last_name}" : "Unknown Candidate",
                     JobTitle = (a.Job != null) ? a.Job.title : "Unknown Job",
                     Status = a.status
-                }).ToListAsync();
+                })
+                .ToListAsync();
+
             return new ServiceResponse<List<ReviewerApplicationDto>> { Data = applications };
         }
+
+        // --- METHOD 3: Add Comment ---
         public async Task<ServiceResponse<ApplicationComment>> AddCommentAsync(int applicationId, string commentText)
         {
-            var comment = new ApplicationComment { application_id = applicationId, comment = commentText, user_id = GetCurrentUserId() };
+            var comment = new ApplicationComment
+            {
+                application_id = applicationId,
+                comment = commentText,
+                user_id = GetCurrentUserId()
+            };
             _context.Application_Comments.Add(comment);
             await _context.SaveChangesAsync();
             return new ServiceResponse<ApplicationComment> { Data = comment, Message = "Comment added." };
         }
+
+        // --- METHOD 4: Update Application Status (THIS WAS THE PROBLEM AREA) ---
         public async Task<ServiceResponse<bool>> UpdateApplicationStatusAsync(int applicationId, string newStatus)
         {
             var application = await _context.Applications.FindAsync(applicationId);
-            if (application == null) return new ServiceResponse<bool> { Success = false, Message = "Application not found." };
+            if (application == null)
+            {
+                return new ServiceResponse<bool> { Success = false, Message = "Application not found." };
+            }
+
             application.status = newStatus;
             await _context.SaveChangesAsync();
+
             return new ServiceResponse<bool> { Data = true, Message = $"Status updated to {newStatus}." };
         }
-        #endregion
     }
 }

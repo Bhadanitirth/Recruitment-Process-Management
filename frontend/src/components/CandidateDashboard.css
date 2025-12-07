@@ -214,3 +214,69 @@
 .doc-link-button:hover {
     background-color: #4338ca;
 }
+/* ... (Keep all existing styles) ... */
+
+/* --- NEW STYLES FOR INTERVIEW HISTORY --- */
+.interview-history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-item {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.history-item.status-scheduled {
+    border-left: 4px solid #3b82f6; /* Blue border for scheduled */
+}
+.history-item.status-completed {
+    border-left: 4px solid #10b981; /* Green border for completed */
+    opacity: 0.8; /* Slightly fade completed items */
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.round-status {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #6b7280;
+}
+
+.round-time {
+    color: #4b5563;
+    font-size: 0.85rem;
+}
+
+.join-link {
+    display: inline-block;
+    margin-top: 6px;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.join-link:hover {
+    text-decoration: underline;
+}
+
+.no-history {
+    color: #9ca3af;
+    font-style: italic;
+}
+/* --- END NEW STYLES --- */
+
+.status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; text-transform: capitalize; }
+/* ... (rest of existing styles) ... */

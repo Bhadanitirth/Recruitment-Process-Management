@@ -5,7 +5,7 @@ import './CandidateDashboard.css';
 import ProfileDocuments from './ProfileDocuments';
 
 function JobListing() {
-    // ... (This component is unchanged) ...
+    // ... (JobListing component remains exactly the same)
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -44,6 +44,7 @@ function JobListing() {
     );
 }
 
+// --- UPDATED COMPONENT: MyApplications ---
 function MyApplications() {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,9 +77,7 @@ function MyApplications() {
             return new Date(dateTimeString).toLocaleString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
             });
-        } catch (e) {
-            return 'Invalid Date';
-        }
+        } catch (e) { return 'Invalid Date'; }
     };
 
     const formatDate = (dateString) => {
@@ -87,11 +86,8 @@ function MyApplications() {
             return new Date(dateString).toLocaleDateString(undefined, {
                 year: 'numeric', month: 'long', day: 'numeric'
             });
-        } catch (e) {
-            return 'Invalid Date';
-        }
+        } catch (e) { return 'Invalid Date'; }
     };
-
 
     return (
         <div className="applications-container">
@@ -100,10 +96,10 @@ function MyApplications() {
                 <table className="applications-table">
                     <thead>
                     <tr>
-                        <th>Job Title</th>
-                        <th>Application Status</th>
-                        <th>Next Step Details</th>
-                        <th>Documents / Joining Date</th>
+                        <th style={{width: '25%'}}>Job Title</th>
+                        <th style={{width: '15%'}}>Status</th>
+                        <th style={{width: '40%'}}>Interview Rounds</th>
+                        <th style={{width: '20%'}}>Documents / Next Steps</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -111,17 +107,39 @@ function MyApplications() {
                         <tr key={app.applicationId}>
                             <td>{app.jobTitle}</td>
                             <td><span className={`status-badge status-${app.applicationStatus?.toLowerCase().replace(' ', '-')}`}>{app.applicationStatus}</span></td>
+
+                            {/* --- INTERVIEW HISTORY COLUMN --- */}
                             <td>
-                                {app.nextStepType ? (
-                                    <div>
-                                        <strong>Type:</strong> {app.nextStepType} <br />
-                                        <strong>Status:</strong> {app.nextStepStatus || 'N/A'} <br />
-                                        <strong>Scheduled:</strong> {formatDateTime(app.nextStepScheduledAt)}
-                                    </div>
+                                {app.interviewHistory && app.interviewHistory.length > 0 ? (
+                                    <ul className="interview-history-list">
+                                        {app.interviewHistory.map((round, idx) => (
+                                            <li key={idx} className={`history-item status-${round.status.toLowerCase()}`}>
+                                                <div className="round-header">
+                                                    <strong>Round {round.roundNumber}: {round.interviewType}</strong>
+                                                    <span className="round-status">{round.status}</span>
+                                                </div>
+                                                <div className="round-time">
+                                                    {formatDateTime(round.scheduledAt)}
+                                                </div>
+                                                {/* Show link ONLY if scheduled */}
+                                                {round.meetingLink && round.status === 'Scheduled' && (
+                                                    <a
+                                                        href={round.meetingLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="join-link"
+                                                    >
+                                                        Join Meeting 🎥
+                                                    </a>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : (
-                                    "Pending Review"
+                                    <span className="no-history">Pending Review</span>
                                 )}
                             </td>
+                            {/* --- END HISTORY COLUMN --- */}
 
                             <td>
                                 {app.applicationStatus === 'Hired' && app.joiningDate ? (
@@ -145,7 +163,7 @@ function MyApplications() {
         </div>
     );
 }
-
+// --- END UPDATED COMPONENT ---
 
 function CandidateDashboard() {
     const [activeTab, setActiveTab] = useState('jobs');
@@ -163,24 +181,9 @@ function CandidateDashboard() {
                 <button onClick={handleLogout} className="logout-button">Logout</button>
             </header>
             <nav className="candidate-nav">
-                <button
-                    onClick={() => setActiveTab('jobs')}
-                    className={activeTab === 'jobs' ? 'active' : ''}
-                >
-                    Job Listings
-                </button>
-                <button
-                    onClick={() => setActiveTab('applications')}
-                    className={activeTab === 'applications' ? 'active' : ''}
-                >
-                    My Applications
-                </button>
-                <button
-                    onClick={() => setActiveTab('profile')}
-                    className={activeTab === 'profile' ? 'active' : ''}
-                >
-                    Profile & Documents
-                </button>
+                <button onClick={() => setActiveTab('jobs')} className={activeTab === 'jobs' ? 'active' : ''}>Job Listings</button>
+                <button onClick={() => setActiveTab('applications')} className={activeTab === 'applications' ? 'active' : ''}>My Applications</button>
+                <button onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'active' : ''}>Profile & Documents</button>
             </nav>
             <main className="candidate-content">
                 {activeTab === 'jobs' && <JobListing />}

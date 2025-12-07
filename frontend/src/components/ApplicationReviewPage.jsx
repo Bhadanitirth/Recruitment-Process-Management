@@ -114,6 +114,13 @@ function ApplicationReviewPage() {
     if (error) return <div className="review-page-container error-message">{error}</div>;
     if (!details) return null;
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleString(undefined, {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+    };
+
     const applicationForModal = {
         application_id: details.applicationId,
         job_id: details.jobId,
@@ -146,6 +153,25 @@ function ApplicationReviewPage() {
                         <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
                     ) : (
                         <p className="error-message">CV not yet uploaded.</p>
+                    )}
+                    {details.interviewHistory && details.interviewHistory.length > 0 && (
+                        <div className="interview-history-section">
+                            <h4>Interview History</h4>
+                            <ul className="history-list">
+                                {details.interviewHistory.map((round, idx) => (
+                                    <li key={idx} className={`history-round status-${round.status.toLowerCase()}`}>
+                                        <div className="round-top">
+                                            <span className="round-number">Round {round.roundNumber}</span>
+                                            <span className="round-status">{round.status}</span>
+                                        </div>
+                                        <div className="round-detail">
+                                            <strong>{round.interviewType}</strong>
+                                            <span>{formatDateTime(round.scheduledAt)}</span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     )}
 
                     <div className="action-buttons">

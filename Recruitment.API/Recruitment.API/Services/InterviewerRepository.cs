@@ -33,6 +33,7 @@ namespace Recruitment.API.Services
             _logger.LogError("User ID claim not found or invalid in token for InterviewerRepository.");
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
+
         public async Task<ServiceResponse<InterviewFeedback>> SubmitFeedbackAsync(int interviewId, FeedbackSubmitDto feedbackDto)
         {
             var interviewerId = GetCurrentUserId();
@@ -59,13 +60,24 @@ namespace Recruitment.API.Services
             {
                 interview.status = "Completed";
 
-                 if (feedback.recommendation == "Hold" || feedback.recommendation == "Reject")
+                var application = await _context.Applications.FindAsync(interview.application_id);
+                if (application != null)
                 {
-                    var application = await _context.Applications.FindAsync(interview.application_id);
-                    if (application != null)
+                    // --- THIS IS THE LOGIC FIX ---
+                    if (feedback.recommendation == "Proceed")
                     {
-                        application.status = (feedback.recommendation == "Hold") ? "On Hold" : "Rejected";
+                        // If Proceed, move back to "Shortlisted" so Recruiter can schedule the NEXT round
+                        application.status = "Shortlisted";
                     }
+                    else if (feedback.recommendation == "Hold")
+                    {
+                        application.status = "On-Hold";
+                    }
+                    else if (feedback.recommendation == "Reject")
+                    {
+                        application.status = "Rejected";
+                    }
+                    // --- END OF LOGIC FIX ---
                 }
             }
 
@@ -74,6 +86,7 @@ namespace Recruitment.API.Services
             return new ServiceResponse<InterviewFeedback> { Data = feedback, Message = "Feedback submitted." };
         }
 
+        // ... (Keep existing methods: GetAssignedInterviewsAsync, GetInterviewDetailsAsync) ...
         #region Unchanged Methods
         public async Task<ServiceResponse<List<InterviewerDashboardItemDto>>> GetAssignedInterviewsAsync()
         {
@@ -99,22 +112,19 @@ namespace Recruitment.API.Services
                 .ToListAsync();
             return new ServiceResponse<List<InterviewerDashboardItemDto>> { Data = interviews };
         }
-
         public async Task<ServiceResponse<InterviewDetailsDto>> GetInterviewDetailsAsync(int interviewId)
         {
             _logger.LogInformation("Fetching details for interview ID {InterviewId}", interviewId);
             try
             {
                 var currentUserId = GetCurrentUserId();
-
                 var interview = await _context.Interviews
                     .Include(i => i.Application).ThenInclude(a => a.Candidate)
                     .Include(i => i.Application).ThenInclude(a => a.Job)
                     .Include(i => i.PanelMembers).ThenInclude(pm => pm.Interviewer)
                     .FirstOrDefaultAsync(i => i.interview_id == interviewId);
 
-                if (interview == null)
-                    return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Interview not found." };
+                if (interview == null) return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Interview not found." };
 
                 var userRole = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Role);
                 var isRecruiter = userRole == "Recruiter";
@@ -122,7 +132,6 @@ namespace Recruitment.API.Services
 
                 if (!isRecruiter && !isAssigned)
                 {
-                    _logger.LogWarning("Security Breach: User {UserId} (role: {UserRole}) tried to access interview {InterviewId} they are not assigned to.", currentUserId, userRole, interviewId);
                     return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "You are not authorized to view this interview." };
                 }
 
@@ -154,7 +163,8 @@ namespace Recruitment.API.Services
                     Status = interview.status,
                     PanelInterviewerNames = interview.PanelMembers.Select(pm => pm.Interviewer != null ? $"{pm.Interviewer.first_name} {pm.Interviewer.last_name}" : "Unknown").ToList(),
                     SubmittedFeedback = submittedFeedback,
-                    CurrentUserId = currentUserId
+                    CurrentUserId = currentUserId,
+                    MeetingLink = interview.meeting_link
                 };
 
                 return new ServiceResponse<InterviewDetailsDto> { Data = details };

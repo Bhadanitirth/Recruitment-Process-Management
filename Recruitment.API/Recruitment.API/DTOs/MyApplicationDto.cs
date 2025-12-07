@@ -14,6 +14,10 @@ namespace Recruitment.API.DTOs
         public string NextStepStatus { get; set; }
 
         public DateTime? JoiningDate { get; set; }
+        public string NextStepMeetingLink { get; set; }
+        public List<InterviewRoundDto> InterviewHistory { get; set; }
     }
+
+ 
 }
 

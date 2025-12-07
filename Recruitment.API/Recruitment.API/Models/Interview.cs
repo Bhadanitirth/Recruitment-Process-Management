@@ -13,7 +13,8 @@ namespace Recruitment.API.Models
         public int round_number { get; set; }
         public string interview_type { get; set; } 
         public DateTime? scheduled_at { get; set; }
-        public string status { get; set; } = "Scheduled"; 
+        public string status { get; set; } = "Scheduled";
+        public string meeting_link { get; set; }
 
         [ForeignKey("application_id")]
         public virtual Application Application { get; set; }

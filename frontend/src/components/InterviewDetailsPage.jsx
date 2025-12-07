@@ -171,6 +171,14 @@ function InterviewDetailsPage() {
                     <p><strong>Round:</strong> {details.roundNumber}</p>
                     <p><strong>Type:</strong> {details.interviewType}</p>
                     <p><strong>Scheduled:</strong> {new Date(details.scheduledAt).toLocaleString()}</p>
+                    {details.meetingLink && (
+                        <p>
+                            <strong>Meeting Link: </strong>
+                            <a href={details.meetingLink} target="_blank" rel="noopener noreferrer" style={{color: '#4f46e5', fontWeight: 'bold'}}>
+                                Click to Join Call 🎥
+                            </a>
+                        </p>
+                    )}
                     <p><strong>Status:</strong> <span className={`status-badge status-${details.status.toLowerCase()}`}>{details.status}</span></p>
                     {details.candidateCvPath &&
                         <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>

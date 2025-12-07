@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// Add FiStar for HR icon
-import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiEdit3, FiStar } from 'react-icons/fi';
+import { FiUser, FiBriefcase, FiHome, FiMail, FiLock, FiEye, FiEyeOff, FiEdit3, FiStar, FiCpu } from 'react-icons/fi';
 import './LoginPage.css';
 import loginImage from '../../assets/login-illustration.png';
 import axios from 'axios';
@@ -13,24 +12,27 @@ const IllustrationSection = () => (
     </div>
 );
 
+// Removed HR from the main list
 const userTypes = [
     { name: 'Candidate', icon: <FiUser /> },
     { name: 'Recruiter', icon: <FiBriefcase /> },
-    { name: 'Inter', icon: <FiHome /> },
+    { name: 'Interviewer', icon: <FiHome /> },
     { name: 'Reviewer', icon: <FiEdit3 /> },
-    { name: 'HR', icon: <FiStar /> },
 ];
 
 const inputConfigs = {
     Candidate: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
     Recruiter: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
-    Inter: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
+    Interviewer: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
     Reviewer: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
-    HR: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
+    // HR config removed as it falls under Interviewer tab logic now
 };
 
 function LoginPage() {
     const [activeTab, setActiveTab] = useState('Candidate');
+    // New state for the sub-role selection (Technical vs HR)
+    const [interviewerSubRole, setInterviewerSubRole] = useState('Technical');
+
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -42,11 +44,24 @@ function LoginPage() {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+
+        // Determine the role to send to the backend
+        let roleToSend = activeTab;
+
+        // Logic: If 'Interviewer' tab is selected, check the sub-role
+        if (activeTab === 'Interviewer') {
+            if (interviewerSubRole === 'HR') {
+                roleToSend = 'HR';
+            } else {
+                roleToSend = 'Interviewer'; // Default for Technical
+            }
+        }
+
         try {
             const response = await axios.post('http://localhost:5256/api/auth/login', {
                 email: email,
                 password: password,
-                userType: activeTab
+                userType: roleToSend // Send the calculated role
             });
             const token = response.data.data;
             localStorage.setItem('token', token);
@@ -62,7 +77,7 @@ function LoginPage() {
                 navigate('/interviewer-dashboard');
             } else if (userRole === 'Reviewer') {
                 navigate('/reviewer-dashboard');
-            } else if (userRole === 'HR') { // Added HR redirect
+            } else if (userRole === 'HR') {
                 navigate('/hr-dashboard');
             } else {
                 navigate('/login'); // Fallback
@@ -87,6 +102,7 @@ function LoginPage() {
                             <h1>Login</h1>
                             <p>Welcome Back!</p>
                         </header>
+
                         <div className="auth-tabs">
                             {userTypes.map((type) => (
                                 <button
@@ -99,6 +115,32 @@ function LoginPage() {
                                 </button>
                             ))}
                         </div>
+
+                        {/* --- Sub-role Selection for Interviewer (Same UI Style) --- */}
+                        {activeTab === 'Interviewer' && (
+                            <div className="auth-tabs" style={{ marginTop: '-1rem', marginBottom: '1.5rem', backgroundColor: 'transparent', padding: '0' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setInterviewerSubRole('Technical')}
+                                    className={`auth-tabs__button ${interviewerSubRole === 'Technical' ? 'auth-tabs__button--active' : ''}`}
+                                    style={{ border: '1px solid #e5e7eb' }} // Ensure border is visible if background is transparent
+                                >
+                                    <FiCpu />
+                                    <span>Technical</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setInterviewerSubRole('HR')}
+                                    className={`auth-tabs__button ${interviewerSubRole === 'HR' ? 'auth-tabs__button--active' : ''}`}
+                                    style={{ border: '1px solid #e5e7eb' }}
+                                >
+                                    <FiStar />
+                                    <span>HR</span>
+                                </button>
+                            </div>
+                        )}
+                        {/* --- End Sub-role Selection --- */}
+
                         <form className="auth-form__body" onSubmit={handleLogin}>
                             <div className="auth-form__field">
                                 <span className="auth-form__icon">{currentInputConfig.icon}</span>
@@ -127,7 +169,7 @@ function LoginPage() {
                                     {showPassword ? <FiEye /> : <FiEyeOff />}
                                 </button>
                             </div>
-                            {error && <p style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+                            {error && <p className="auth-form__error">{error}</p>}
                             <div className="auth-form__forgot"><a href="#">Forgot Password?</a></div>
                             <button type="submit" className="auth-form__submit">Login</button>
                         </form>

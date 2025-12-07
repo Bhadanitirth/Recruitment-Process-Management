@@ -15,5 +15,7 @@
         public string LatestInterviewType { get; set; }
         public DateTime? LatestInterviewScheduledAt { get; set; }
         public string LatestInterviewStatus { get; set; }
+
+        public List<InterviewRoundDto> InterviewHistory { get; set; }
     }
 }
