@@ -3,14 +3,17 @@ import LoginPage from './components/login/LoginPage';
 import SignupPage from './components/signup/SignupPage';
 import InterviewerDashboard from './components/InterviewerDashboard';
 import CandidateDashboard from './components/CandidateDashboard';
-import RecruiterDashboard from './components/RecruiterDashboard';
+import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import JobDetailsPage from './components/JobDetailsPage';
-import ApplicationReviewPage from './components/ApplicationReviewPage';
+import JobDetailsPage from './components/recruiter/JobDetailsPage';
+import ApplicationReviewPage from './components/recruiter/ApplicationReviewPage';
 import ReviewerDashboard from "./components/ReviewerDashboard.jsx";
+import JobsPage from './components/recruiter/JobsPage';
+import CandidatesPage from './components/recruiter/CandidatesPage';
 import InterviewDetailsPage from "./components/InterviewDetailsPage.jsx";
 import DocumentManagementPage from "./components/DocumentManagementPage.jsx";
 import HRDashboard from "./components/HRDashboard.jsx";
+import ReportsDashboard from "./components/recruiter/ReportsDashboard.jsx";
 
 function App() {
     return (
@@ -35,6 +38,18 @@ function App() {
                 } />
                 <Route path="/hr-dashboard" element={
                     <ProtectedRoute allowedRoles={['HR', 'Recruiter']}> <HRDashboard /> </ProtectedRoute>
+                } />
+                <Route path="/reports" element={
+                    <ProtectedRoute allowedRoles={['Recruiter']}>
+                        <ReportsDashboard />
+                    </ProtectedRoute>
+                } />
+                <Route path="/recruiter/jobs" element={
+                    <ProtectedRoute allowedRoles={['Recruiter']}> <JobsPage /> </ProtectedRoute>
+                } />
+
+                <Route path="/recruiter/candidates" element={
+                    <ProtectedRoute allowedRoles={['Recruiter']}> <CandidatesPage /> </ProtectedRoute>
                 } />
 
                 <Route path="/jobs/:jobId" element={

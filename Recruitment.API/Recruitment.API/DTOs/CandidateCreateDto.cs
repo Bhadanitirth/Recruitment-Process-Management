@@ -6,7 +6,7 @@
         public string LastName { get; set; }
         public string Email { get; set; }
         public string? Phone { get; set; }
-
+        public string? CollegeName { get; set; }
         public IFormFile? CvFile { get; set; }
     }
 }

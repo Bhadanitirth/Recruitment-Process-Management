@@ -18,5 +18,6 @@ namespace Recruitment.API.Models
 
         [ForeignKey("created_by_user_id")]
         public virtual User CreatedBy { get; set; }
+        public string college_name { get; set; }
     }
 }

@@ -27,6 +27,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<PdfReportService>();
+
 builder.Services.AddScoped<IRecruiterRepository, RecruiterRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -60,10 +65,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowReactApp");
 app.UseAuthentication();
-app.UseStaticFiles();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

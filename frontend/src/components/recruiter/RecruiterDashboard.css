@@ -1,0 +1,401 @@
+/* --- Variables matching your Login Page Theme --- */
+:root {
+    --bg-color: #F0FDF4;
+    --primary-color: #3A7A58;
+    --primary-dark: #2f6347;
+    --primary-light: #4A8A69;
+    --accent-color: #4ADE80;
+    --text-white: #FFFFFF;
+    --text-dark: #111827;
+    --text-muted: #6B7280;
+    --border-color: #E5E7EB;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* --- Layout Structure --- */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* --- Sidebar --- */
+.dashboard-sidebar {
+    width: 260px;
+    background-color: var(--primary-color);
+    color: var(--text-white);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
+
+.sidebar-brand h2 {
+    font-size: 1.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-accent {
+    color: var(--accent-color);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    color: #d1fae5;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+}
+
+.nav-item.active {
+    background-color: var(--primary-light);
+    color: var(--text-white);
+    font-weight: 600;
+}
+
+.nav-item.logout {
+    margin-top: auto;
+    color: #fca5a5;
+}
+
+.nav-item.logout:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+/* --- Main Content --- */
+.dashboard-main {
+    flex: 1;
+    width: 1000px;
+    margin-left: 260px; /* Offset for sidebar */
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* --- Header --- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+}
+
+.header-title h1 {
+    font-size: 2rem;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.header-title p {
+    color: var(--text-muted);
+    margin: 0.25rem 0 0 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn-action:active {
+    transform: scale(0.98);
+}
+
+.btn-action.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-action.secondary {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.btn-action.outline {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* --- Stats Grid --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.jobs-icon { background-color: #dbeafe; color: #2563eb; }
+.candidates-icon { background-color: #d1fae5; color: #059669; }
+.interviews-icon { background-color: #fef3c7; color: #d97706; }
+
+.stat-info h3 {
+    font-size: 1.75rem;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.stat-info p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* --- Content Grid --- */
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.content-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.badge {
+    background-color: #f3f4f6;
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+/* --- Tables & Lists --- */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dashboard-table th {
+    text-align: left;
+    padding-bottom: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.dashboard-table td {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.dashboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.job-title {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pill.open { background-color: #d1fae5; color: #065f46; }
+.status-pill.closed { background-color: #f3f4f6; color: #374151; }
+
+.link-text {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.link-text:hover {
+    text-decoration: underline;
+}
+
+/* Candidate List */
+.candidate-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.candidate-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-light);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.candidate-details h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.candidate-details p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.view-more {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+.loading-screen, .error-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+.error-screen {
+    color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ... (Keep all your existing variables and layout styles) ... */
+
+/* --- Search Bar Styles (Add this section) --- */
+.search-container {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem; /* Left padding for icon */
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(58, 122, 88, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}

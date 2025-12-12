@@ -1,0 +1,208 @@
+/* Import fonts or variables if not globally available, but assuming they are from RecruiterDashboard.css */
+:root {
+    --primary-color: #3A7A58;
+    --primary-dark: #2f6347;
+    --text-dark: #111827;
+    --text-muted: #6B7280;
+    --border-color: #E5E7EB;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-overlay);
+    backdrop-filter: blur(4px); /* Professional blur effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.modal-content {
+    background-color: white;
+    color: var(--text-dark);
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 550px; /* Slightly wider */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    position: relative;
+    /* Reset padding as we now have header/body/footer */
+    padding: 0;
+}
+
+/* --- New Header Structure --- */
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.close-btn-icon {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.close-btn-icon:hover {
+    background-color: #e5e7eb;
+    color: var(--text-dark);
+}
+
+/* --- Scrollable Body --- */
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1; /* Takes available space */
+}
+
+/* --- Form Styles --- */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(58, 122, 88, 0.1); /* Matching green glow */
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* React Select overrides */
+.react-select-container .react-select__control {
+    border-color: var(--border-color);
+    border-radius: 0.5rem;
+    min-height: 42px;
+}
+.react-select-container .react-select__control--is-focused {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 1px var(--primary-color) !important;
+}
+
+/* --- Footer Actions --- */
+.modal-actions {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: #f9fafb;
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+.modal-actions button {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-primary:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: #374151;
+    border: 1px solid var(--border-color) !important;
+}
+
+.btn-secondary:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.error-message {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    border: 1px solid #fecaca;
+}
+
+/* Scrollbar Styling */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
+}
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
