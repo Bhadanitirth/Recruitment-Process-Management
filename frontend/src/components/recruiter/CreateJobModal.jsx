@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import { FiX } from 'react-icons/fi'; // Import Close Icon
+import { FiX } from 'react-icons/fi';
 import '../common/Modal.css';
 
 function CreateJobModal({ isOpen, onClose, onJobCreated }) {
@@ -82,7 +82,6 @@ function CreateJobModal({ isOpen, onClose, onJobCreated }) {
                     </button>
                 </div>
 
-                {/* Scrollable Body */}
                 <div className="modal-body">
                     {error && <div className="error-message">{error}</div>}
 
@@ -134,7 +133,6 @@ function CreateJobModal({ isOpen, onClose, onJobCreated }) {
                     </form>
                 </div>
 
-                {/* Footer Actions */}
                 <div className="modal-actions">
                     <button type="button" onClick={handleClose} className="btn-secondary">Cancel</button>
                     <button type="submit" form="create-job-form" className="btn-primary" disabled={loading}>

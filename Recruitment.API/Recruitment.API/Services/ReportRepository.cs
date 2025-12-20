@@ -5,7 +5,7 @@ using Recruitment.API.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System; // Required for DateTime
+using System; 
 
 namespace Recruitment.API.Services
 {
@@ -18,10 +18,9 @@ namespace Recruitment.API.Services
             _context = context;
         }
 
-        // --- UPDATED METHOD: GetHeadlinesAsync ---
         public async Task<ServiceResponse<DashboardSummaryDto>> GetHeadlinesAsync()
         {
-            var today = DateTime.UtcNow.Date; // Get today's date (UTC)
+            var today = DateTime.UtcNow.Date; 
             var tomorrow = today.AddDays(1);
 
             var summary = new DashboardSummaryDto
@@ -29,7 +28,6 @@ namespace Recruitment.API.Services
                 TotalJobs = await _context.Jobs.CountAsync(j => j.status == "Open"),
                 TotalCandidates = await _context.Candidates.CountAsync(),
 
-                // Count interviews where scheduled_at is >= today AND < tomorrow
                 InterviewsScheduled = await _context.Interviews
                     .CountAsync(i => i.status == "Scheduled" &&
                                      i.scheduled_at >= today &&
@@ -39,9 +37,6 @@ namespace Recruitment.API.Services
             };
             return new ServiceResponse<DashboardSummaryDto> { Data = summary };
         }
-        // --- END OF UPDATE ---
-
-        // ... (The rest of your methods: GetPositionStatsAsync, GetCollegeStatsAsync, etc. remain unchanged)
         #region Unchanged Methods
         public async Task<ServiceResponse<List<ReportChartDataDto>>> GetPositionStatsAsync() { var data = await _context.Applications.Include(a => a.Job).GroupBy(a => a.Job.title).Select(g => new ReportChartDataDto { Label = g.Key, Value = g.Count() }).ToListAsync(); return new ServiceResponse<List<ReportChartDataDto>> { Data = data }; }
         public async Task<ServiceResponse<List<ReportChartDataDto>>> GetCollegeStatsAsync() { var data = await _context.Candidates.Where(c => !string.IsNullOrEmpty(c.college_name)).GroupBy(c => c.college_name).Select(g => new ReportChartDataDto { Label = g.Key, Value = g.Count() }).ToListAsync(); return new ServiceResponse<List<ReportChartDataDto>> { Data = data }; }

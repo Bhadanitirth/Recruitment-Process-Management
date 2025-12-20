@@ -19,7 +19,8 @@ namespace Recruitment.API.Services
         Task<ServiceResponse<Application>> LinkCandidateToJobAsync(int jobId, ApplicationCreateDto appDto);
         Task<ServiceResponse<List<Application>>> GetApplicationsAsync(); Task<ServiceResponse<List<UserDto>>> GetAvailableReviewersAsync();
         Task<ServiceResponse<JobReviewer>> AssignReviewerToJobAsync(int jobId, int reviewerUserId);
-        Task<ServiceResponse<List<UserDto>>> GetAvailableInterviewersAsync(); 
+        Task<ServiceResponse<List<UserDto>>> GetAvailableInterviewersAsync();
+        Task<ServiceResponse<List<UserDto>>> GetAvailableHrUsersAsync();
         Task<ServiceResponse<JobInterviewer>> AssignInterviewerToJobAsync(int jobId, int interviewerUserId);
         Task<ServiceResponse<Interview>> ScheduleInterviewAsync(InterviewScheduleDto scheduleDto);
 

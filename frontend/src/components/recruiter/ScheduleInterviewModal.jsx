@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import { FiX } from 'react-icons/fi'; // Import Close Icon
+import { FiX } from 'react-icons/fi';
 import '../common/Modal.css';
 
 function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewScheduled }) {
-    // Default to 'Technical'
     const [interviewType, setInterviewType] = useState('Technical');
+    const [isOnlineTest, setIsOnlineTest] = useState(false);
     const [scheduledAt, setScheduledAt] = useState('');
     const [availableInterviewers, setAvailableInterviewers] = useState([]);
     const [selectedInterviewers, setSelectedInterviewers] = useState([]);
@@ -14,27 +14,25 @@ function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewSched
     const [error, setError] = useState('');
     const [loadingInterviewers, setLoadingInterviewers] = useState(false);
 
-    // Fetch interviewers logic (unchanged logic, just re-wrapped in new UI structure)
     useEffect(() => {
         if (!isOpen || !application?.application_id) return;
 
         const fetchInterviewers = async () => {
             setLoadingInterviewers(true);
             setError('');
-            setAvailableInterviewers([]); // Clear previous list
-            setSelectedInterviewers([]); // Clear selection
+            setAvailableInterviewers([]);
+            setSelectedInterviewers([]);
 
             const token = localStorage.getItem('token');
             let url = '';
 
-            // Set the correct API endpoint based on the selected interview type
             if (interviewType === 'HR') {
                 url = 'http://localhost:5256/api/jobs/hr';
             } else if (interviewType === 'Technical' || interviewType === 'Online Test') {
                 url = 'http://localhost:5256/api/jobs/interviewers';
             } else {
                 setLoadingInterviewers(false);
-                return; // Do nothing if no type is selected
+                return;
             }
 
             try {
@@ -73,7 +71,7 @@ function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewSched
 
         const scheduleData = {
             applicationId: application.application_id,
-            roundNumber: 1, // Logic handles correct round calculation in backend
+            roundNumber: 1,
             interviewType: interviewType,
             scheduledAt: scheduledAt,
             interviewerIds: selectedInterviewers.map(i => i.value),
@@ -108,7 +106,6 @@ function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewSched
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                {/* --- HEADER --- */}
                 <div className="modal-header">
                     <h2>Schedule Interview</h2>
                     <button className="close-btn-icon" onClick={handleClose} aria-label="Close">
@@ -116,7 +113,6 @@ function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewSched
                     </button>
                 </div>
 
-                {/* --- BODY --- */}
                 <div className="modal-body">
                     <p style={{marginBottom: '1.5rem', color: '#6B7280'}}>
                         For: <strong style={{color: '#111827'}}>{application.candidate?.first_name || '...'} {application.candidate?.last_name || '...'}</strong>
@@ -161,7 +157,6 @@ function ScheduleInterviewModal({ isOpen, onClose, application, onInterviewSched
                     </form>
                 </div>
 
-                {/* --- FOOTER --- */}
                 <div className="modal-actions">
                     <button type="button" onClick={handleClose} disabled={loading} className="btn-secondary">Cancel</button>
                     <button type="submit" form="schedule-interview-form" className="btn-primary" disabled={loadingInterviewers || loading}>

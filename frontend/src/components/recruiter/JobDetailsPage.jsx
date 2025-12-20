@@ -4,9 +4,9 @@ import axios from 'axios';
 import { FiArrowLeft, FiPlus, FiUserPlus, FiSearch } from 'react-icons/fi';
 import LinkCandidateModal from './LinkCandidateModal';
 import AssignReviewerModal from './AssignReviewerModal';
-import RecruiterSidebar from './RecruiterSidebar';
 import './RecruiterDashboard.css';
 import './JobDetailsPage.css';
+import Sidebar from "../common/Sidebar.jsx";
 
 function JobDetailsPage() {
     const { jobId } = useParams();
@@ -35,7 +35,7 @@ function JobDetailsPage() {
 
             setJob(currentJob);
             setApplications(jobApps);
-            setFilteredApplications(jobApps); // Initialize filtered list
+            setFilteredApplications(jobApps);
             setError('');
         } catch (err) {
             setError('Failed to load job details. Please try again.');
@@ -71,7 +71,7 @@ function JobDetailsPage() {
 
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="jobs" />
+            <Sidebar role="Recruiter" activeItem="jobs" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -99,7 +99,6 @@ function JobDetailsPage() {
 
                 <div className="content-grid" style={{ gridTemplateColumns: '1fr' }}>
 
-                    {/* Job Description Card */}
                     <div className="content-card">
                         <div className="card-header">
                             <h2>Description</h2>
@@ -111,7 +110,6 @@ function JobDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Applications List Card */}
                     <div className="content-card">
                         <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{display:'flex', gap: '10px', alignItems:'center'}}>
@@ -119,7 +117,6 @@ function JobDetailsPage() {
                                 <span className="badge">{applications.length}</span>
                             </div>
 
-                            {/* Search Bar */}
                             <div className="search-container" style={{maxWidth: '300px'}}>
                                 <FiSearch className="search-icon" />
                                 <input
@@ -179,7 +176,6 @@ function JobDetailsPage() {
                 </div>
             </main>
 
-            {/* Modals */}
             <LinkCandidateModal
                 isOpen={isLinkModalOpen}
                 onClose={() => setLinkModalOpen(false)}

@@ -39,7 +39,6 @@ function BulkAddModal({ isOpen, onClose, onCandidatesAdded }) {
             );
             setMessage(response.data.message);
             onCandidatesAdded();
-            // Optional: Close after success or keep open to show message
         } catch (err) {
             setError('Upload failed. Please check the file format.');
             console.error(err);
@@ -51,7 +50,6 @@ function BulkAddModal({ isOpen, onClose, onCandidatesAdded }) {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                {/* --- HEADER --- */}
                 <div className="modal-header">
                     <h2>Bulk Add Candidates</h2>
                     <button className="close-btn-icon" onClick={onClose} aria-label="Close">
@@ -59,7 +57,6 @@ function BulkAddModal({ isOpen, onClose, onCandidatesAdded }) {
                     </button>
                 </div>
 
-                {/* --- BODY --- */}
                 <div className="modal-body">
                     <div style={{textAlign: 'center', marginBottom: '1.5rem', color: '#6B7280'}}>
                         <FiUploadCloud size={48} style={{marginBottom: '0.5rem', color: '#D1D5DB'}}/>
@@ -82,7 +79,6 @@ function BulkAddModal({ isOpen, onClose, onCandidatesAdded }) {
                     {message && <div className="success-message">{message}</div>}
                 </div>
 
-                {/* --- FOOTER --- */}
                 <div className="modal-actions">
                     <button type="button" onClick={onClose} className="btn-secondary">Close</button>
                     <button type="button" onClick={handleUpload} className="btn-primary" disabled={loading}>

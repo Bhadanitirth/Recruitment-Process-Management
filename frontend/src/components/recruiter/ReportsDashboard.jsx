@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
 import { FiUsers, FiBriefcase, FiGrid, FiCheckCircle, FiDownload, FiBarChart2, FiLogOut } from 'react-icons/fi';
 import './ReportsDashboard.css';
-import RecruiterSidebar from './RecruiterSidebar'; // Import sidebar
+import Sidebar from "../common/Sidebar.jsx";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -67,7 +67,7 @@ function ReportsDashboard() {
 
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="reports" />
+            <Sidebar role="Recruiter" activeItem="reports" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -77,7 +77,6 @@ function ReportsDashboard() {
                     </div>
                 </header>
 
-                {/* --- UI UPDATE: Centered Loading Message --- */}
                 {loading || !summary ? (
                     <div style={{
                         display: 'flex',
@@ -125,7 +124,6 @@ function ReportsDashboard() {
                         </div>
 
                         <div className="charts-grid">
-                            {/* Position Wise */}
                             <div className="chart-card">
                                 <div className="chart-header">
                                     <h3>Applications per Position</h3>
@@ -146,7 +144,6 @@ function ReportsDashboard() {
                                 </div>
                             </div>
 
-                            {/* Funnel */}
                             <div className="chart-card">
                                 <div className="chart-header">
                                     <h3>Candidate Funnel</h3>
@@ -180,7 +177,6 @@ function ReportsDashboard() {
                                 </div>
                             </div>
 
-                            {/* College Stats */}
                             <div className="chart-card full-width">
                                 <div className="chart-header">
                                     <h3>College Distribution</h3>

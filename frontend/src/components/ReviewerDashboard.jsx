@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { FiClock, FiCheckSquare } from 'react-icons/fi';
 import './ReviewerDashboard.css';
+import Sidebar from "./common/Sidebar.jsx";
 
 function ReviewerDashboard() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
-    const [assignedApps, setAssignedApps] = useState([]); // State for assigned applications
-    const [loadingProfile, setLoadingProfile] = useState(true);
-    const [loadingApps, setLoadingApps] = useState(true);
+    const [assignedApps, setAssignedApps] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -18,85 +19,115 @@ function ReviewerDashboard() {
             return;
         }
 
-        const fetchProfile = async () => {
-            setLoadingProfile(true);
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get('http://localhost:5256/api/profile/me', {
+                const profileRes = await axios.get('http://localhost:5256/api/profile/me', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (response.data?.roleName === 'Reviewer') {
-                    setUserData(response.data);
+
+                if (profileRes.data?.roleName === 'Reviewer') {
+                    setUserData(profileRes.data);
+
+                    const appsRes = await axios.get('http://localhost:5256/api/reviewer/assigned-applications', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    setAssignedApps(appsRes.data.data || []);
                 } else {
-                    handleLogout();
+                    localStorage.removeItem('token');
+                    navigate('/login');
                 }
             } catch (err) {
-                setError('Failed to fetch profile data.');
-                handleLogout();
+                console.error(err);
+                setError('Failed to load dashboard data.');
             } finally {
-                setLoadingProfile(false);
+                setLoading(false);
             }
         };
 
-        const fetchAssignedApps = async () => {
-            setLoadingApps(true);
-            try {
-                const response = await axios.get('http://localhost:5256/api/reviewer/assigned-applications', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                setAssignedApps(response.data.data || []);
-            } catch (err) {
-                setError('Failed to fetch assigned applications.');
-            } finally {
-                setLoadingApps(false);
-            }
-        };
-
-        fetchProfile();
-        fetchAssignedApps();
-
+        fetchData();
     }, [navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
-    };
+    if (loading) return <div className="loading-screen">Loading...</div>;
+    if (error) return <div className="error-screen">{error}</div>;
 
-    if (loadingProfile || loadingApps) return <div className="reviewer-card">Loading...</div>;
-    if (error) return <div className="reviewer-card error-message">{error}</div>;
-    if (!userData) return null;
+    const pendingCount = assignedApps.filter(app => app.status !== 'Rejected' && app.status !== 'Hired').length;
 
     return (
-        <div className="reviewer-card">
-            <h1>Reviewer Dashboard</h1>
-            <div className="reviewer-info">
-                <p><strong>Name:</strong> {userData.firstName} {userData.lastName}</p>
-                <p><strong>Email:</strong> {userData.email}</p>
-                <p><strong>Role:</strong> {userData.roleName}</p>
-            </div>
+        <div className="dashboard-layout">
+            <Sidebar role="Reviewer" activeItem="dashboard" />
 
-            <div className="assigned-applications">
-                <h2>Applications Assigned for Review</h2>
-                {assignedApps.length > 0 ? (
-                    <ul className="application-list">
-                        {assignedApps.map(app => (
-                            <li key={app.applicationId}>
-                                <Link to={`/applications/${app.applicationId}`}>
-                                    <strong>{app.candidateName}</strong> for {app.jobTitle}
-                                </Link>
-                                <span className={`status-badge status-${app.status.toLowerCase().replace(' ', '-')}`}>
-                                  {app.status}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p style={{ color: '#6b7280' }}>No applications are currently assigned to you for review.</p>
-                )}
-            </div>
-            <button onClick={handleLogout} className="logout-button" style={{ marginTop: '20px' }}>Logout</button>
+            <main className="dashboard-main">
+                <header className="main-header">
+                    <div className="header-title">
+                        <h1>Reviewer Dashboard</h1>
+                        <p>Welcome back, {userData?.firstName}</p>
+                    </div>
+                </header>
+
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{backgroundColor: '#e0f2fe', color: '#0284c7'}}>
+                            <FiClock />
+                        </div>
+                        <div className="stat-info">
+                            <h3>{pendingCount}</h3>
+                            <p>Pending Reviews</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="content-card full-width">
+                    <div className="card-header">
+                        <h2>Assigned Applications</h2>
+                    </div>
+                    <div className="card-body">
+                        {assignedApps.length > 0 ? (
+                            <div className="table-container">
+                                <table className="dashboard-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Job Title</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {assignedApps.map(app => (
+                                        <tr key={app.applicationId}>
+                                            <td>
+                                                <div className="job-title" style={{display:'flex', alignItems:'center', gap:'0.5rem'}}>
+                                                    <div className="candidate-avatar-small" style={{width:'32px', height:'32px', borderRadius:'50%', background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.8rem', fontWeight:'600', color:'#6b7280'}}>
+                                                        {app.candidateName.charAt(0)}
+                                                    </div>
+                                                    {app.candidateName}
+                                                </div>
+                                            </td>
+                                            <td>{app.jobTitle}</td>
+                                            <td>
+                                                    <span className={`status-pill status-${app.status?.toLowerCase().replace(' ', '-')}`}>
+                                                        {app.status}
+                                                    </span>
+                                            </td>
+                                            <td>
+                                                <Link to={`/applications/${app.applicationId}`} className="btn-action outline small">
+                                                    Review
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="empty-state">No applications assigned for review.</div>
+                        )}
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }
 
 export default ReviewerDashboard;
-

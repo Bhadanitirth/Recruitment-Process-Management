@@ -8,7 +8,6 @@ namespace Recruitment.API.Services
 {
     public class PdfReportService
     {
-        // Generic method to generate a table report
         public byte[] GeneratePdfReport(string title, List<ReportChartDataDto> data)
         {
             var document = Document.Create(container =>
@@ -30,14 +29,12 @@ namespace Recruitment.API.Services
                         {
                             x.Item().Table(table =>
                             {
-                                // Definition
                                 table.ColumnsDefinition(columns =>
                                 {
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
                                 });
 
-                                // Header
                                 table.Header(header =>
                                 {
                                     header.Cell().Element(CellStyle).Text("Category");
@@ -49,7 +46,6 @@ namespace Recruitment.API.Services
                                     }
                                 });
 
-                                // Data
                                 foreach (var item in data)
                                 {
                                     table.Cell().Element(CellStyle).Text(item.Label);

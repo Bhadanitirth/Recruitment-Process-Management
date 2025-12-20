@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FiX } from 'react-icons/fi'; // Import Close Icon
+import { FiX } from 'react-icons/fi';
 import '../common/Modal.css';
 
 function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
@@ -11,7 +11,7 @@ function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
     const [collegeName, setCollegeName] = useState('');
     const [cvFile, setCvFile] = useState(null);
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false); // Add loading state
+    const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
@@ -41,7 +41,6 @@ function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
                     }}
             );
             onCandidateAdded();
-            // Clear form
             setFirstName(''); setLastName(''); setEmail(''); setPhone(''); setCollegeName(''); setCvFile(null);
             onClose();
         } catch (err) {
@@ -56,7 +55,6 @@ function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                {/* --- HEADER --- */}
                 <div className="modal-header">
                     <h2>Add New Candidate</h2>
                     <button className="close-btn-icon" onClick={onClose} aria-label="Close">
@@ -64,7 +62,6 @@ function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
                     </button>
                 </div>
 
-                {/* --- BODY --- */}
                 <div className="modal-body">
                     {error && <div className="error-message">{error}</div>}
 
@@ -96,13 +93,12 @@ function AddCandidateModal({ isOpen, onClose, onCandidateAdded }) {
                                 id="cvFile"
                                 onChange={e => setCvFile(e.target.files[0])}
                                 accept=".pdf,.doc,.docx"
-                                style={{padding: '0.5rem'}} // Slight override for file input padding
+                                style={{padding: '0.5rem'}}
                             />
                         </div>
                     </form>
                 </div>
 
-                {/* --- FOOTER --- */}
                 <div className="modal-actions">
                     <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
                     <button type="submit" form="add-candidate-form" className="btn-primary" disabled={loading}>

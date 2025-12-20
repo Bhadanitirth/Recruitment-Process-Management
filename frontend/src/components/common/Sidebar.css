@@ -1,0 +1,146 @@
+:root {
+    --primary-color: #3A7A58;
+    --primary-dark: #2f6347;
+    --text-white: #FFFFFF;
+    --accent-color: #4ADE80;
+}
+
+.dashboard-sidebar {
+    width: 260px;
+    background-color: var(--primary-color);
+    color: var(--text-white);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.sidebar-brand {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-brand h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-white);
+    letter-spacing: 0.5px;
+}
+
+.brand-accent {
+    color: var(--accent-color);
+    margin-left: 0.25rem;
+    font-size: 0.8em;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+}
+
+.nav-item.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-white);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.nav-item svg {
+    font-size: 1.2rem;
+}
+
+.sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    background-color: var(--accent-color);
+    color: var(--primary-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.user-info-mini {
+    overflow: hidden;
+}
+
+.user-name {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-email {
+    margin: 0;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-item.logout {
+    color: #fca5a5;
+    margin-top: 0;
+}
+
+.nav-item.logout:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}

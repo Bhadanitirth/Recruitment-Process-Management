@@ -163,10 +163,10 @@
 }
 
 .history-round.status-completed {
-    border-left: 4px solid #10b981; /* Green border for completed */
+    border-left: 4px solid #10b981;
 }
 .history-round.status-scheduled {
-    border-left: 4px solid #3b82f6; /* Blue border for scheduled */
+    border-left: 4px solid #3b82f6;
 }
 
 .round-top {

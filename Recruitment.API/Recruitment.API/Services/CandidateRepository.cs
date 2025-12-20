@@ -36,7 +36,6 @@ namespace Recruitment.API.Services
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
 
-        // --- UPDATED METHOD: GetMyApplicationsAsync ---
         public async Task<ServiceResponse<List<MyApplicationDto>>> GetMyApplicationsAsync()
         {
             _logger.LogInformation("Fetching applications for user ID {UserId}", GetCurrentUserId());
@@ -53,15 +52,14 @@ namespace Recruitment.API.Services
                 var applicationsWithInterviews = await _context.Applications
                     .Where(a => a.candidate_id == candidate.candidate_id)
                     .Include(a => a.Job)
-                    .Include(a => a.Interviews) // Include ALL interviews
+                    .Include(a => a.Interviews)
                     .OrderByDescending(a => a.applied_at)
                     .ToListAsync();
 
                 var applicationDtos = applicationsWithInterviews.Select(a => {
 
-                    // Map all interviews to the history list
                     var history = a.Interviews
-                        .OrderBy(i => i.round_number) // Sort by round 1, 2, 3...
+                        .OrderBy(i => i.round_number) 
                         .Select(i => new InterviewRoundDto
                         {
                             RoundNumber = i.round_number,
@@ -78,7 +76,6 @@ namespace Recruitment.API.Services
                         ApplicationStatus = a.status,
                         AppliedAt = a.applied_at,
 
-                        // --- ASSIGN THE HISTORY ---
                         InterviewHistory = history,
 
                         JoiningDate = a.joining_date
@@ -94,7 +91,6 @@ namespace Recruitment.API.Services
             }
         }
 
-        // ... (Unchanged Methods: GetOpenJobsAsync, GetMyProfileAsync, UpdateCvAsync)
         #region Unchanged Methods
         public async Task<ServiceResponse<List<JobListingDto>>> GetOpenJobsAsync()
         {

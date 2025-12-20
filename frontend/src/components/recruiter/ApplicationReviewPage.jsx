@@ -2,24 +2,39 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiArrowLeft } from 'react-icons/fi';
+import { jwtDecode } from 'jwt-decode';
 import ScheduleInterviewModal from './ScheduleInterviewModal';
-import RecruiterSidebar from './RecruiterSidebar'; // Import sidebar
-import './RecruiterDashboard.css'; // Use shared dashboard styles
+import './RecruiterDashboard.css';
 import './ApplicationReviewPage.css';
+import Sidebar from "../common/Sidebar.jsx";
 
 function ApplicationReviewPage() {
     const { applicationId } = useParams();
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [newComment, setNewComment] = useState('');
     const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
 
+    const [userRole, setUserRole] = useState(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                return decoded.role;
+            } catch (e) {
+                console.error("Failed to decode token");
+                return '';
+            }
+        }
+        return '';
+    });
+
     const fetchDetails = useCallback(async () => {
         const token = localStorage.getItem('token');
         try {
-            setLoading((prevLoading) => !details);
+            setLoading((prev) => !details);
             const response = await axios.get(`http://localhost:5256/api/applications/${applicationId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -90,6 +105,9 @@ function ApplicationReviewPage() {
                 );
 
             case 'Shortlisted':
+                if (userRole === 'Reviewer') {
+                    return <p style={{color: '#6b7280', fontStyle: 'italic', fontSize: '0.9rem'}}>Waiting for Recruiter to schedule interview.</p>;
+                }
                 return (
                     <button onClick={() => setScheduleModalOpen(true)} className="schedule-btn">
                         Schedule Interview
@@ -122,125 +140,134 @@ function ApplicationReviewPage() {
         });
     };
 
-    if (loading) return <div className="loading-screen">Loading application details...</div>;
-    if (error) return <div className="error-screen">{error}</div>;
-    if (!details) return <div className="error-screen">Application not found.</div>;
-
-    const applicationForModal = {
-        application_id: details.applicationId,
-        job_id: details.jobId,
-        candidate: {
-            first_name: details.candidateName?.split(' ')[0],
-            last_name: details.candidateName?.split(' ').slice(1).join(' ')
-        }
-    };
-
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="jobs" />
+            {userRole === 'Reviewer' ? (
+                <Sidebar role="Reviewer" activeItem="dashboard" />
+            ) : (
+                <Sidebar role="Recruiter" activeItem="jobs" />
+            )}
 
             <main className="dashboard-main">
-                <header className="main-header">
-                    <div className="header-title">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <h1>Review Application</h1>
-                            <span className={`status-pill status-${details.applicationStatus.toLowerCase().replace(' ', '-')}`}>
-                                {details.applicationStatus}
-                            </span>
-                        </div>
-                        <p>Application ID: {details.applicationId} • for {details.candidateName}</p>
+                {loading && !details ? (
+                    <div className="loading-screen" style={{height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        Loading application details...
                     </div>
-                    <div className="header-actions">
-                        <button className="btn-action outline" onClick={() => navigate(-1)}> {/* Navigate back in history */}
-                            <FiArrowLeft /> Back
-                        </button>
-                    </div>
-                </header>
-
-                <div className="review-grid"> {/* Use existing grid layout but improved */}
-
-                    {/* Left Column: Candidate Info */}
-                    <div className="content-card candidate-info-panel">
-                        <div className="card-header">
-                            <h2>Candidate Details</h2>
-                        </div>
-                        <div className="card-body">
-                            {details.pastApplications && details.pastApplications.length > 0 && (
-                                <div className="past-activity-notification" style={{marginBottom: '1.5rem'}}>
-                                    <p><strong>⚠️ Past Activity:</strong> This candidate has applied for other positions before.</p>
+                ) : error ? (
+                    <div className="error-screen" style={{padding: '2rem', textAlign: 'center'}}>{error}</div>
+                ) : !details ? (
+                    <div className="error-screen" style={{padding: '2rem', textAlign: 'center'}}>Application not found.</div>
+                ) : (
+                    <>
+                        <header className="main-header">
+                            <div className="header-title">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <h1>Review Application</h1>
+                                    <span className={`status-pill status-${details.applicationStatus.toLowerCase().replace(' ', '-')}`}>
+                                        {details.applicationStatus}
+                                    </span>
                                 </div>
-                            )}
-
-                            <p><strong>Name:</strong> {details.candidateName}</p>
-                            <p><strong>Email:</strong> {details.candidateEmail}</p>
-
-                            {details.candidateCvPath ? (
-                                <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
-                            ) : (
-                                <p className="error-message">CV not yet uploaded.</p>
-                            )}
-
-                            {details.interviewHistory && details.interviewHistory.length > 0 && (
-                                <div className="interview-history-section">
-                                    <h4>Interview History</h4>
-                                    <ul className="history-list">
-                                        {details.interviewHistory.map((round, idx) => (
-                                            <li key={idx} className={`history-round status-${round.status.toLowerCase()}`}>
-                                                <div className="round-top">
-                                                    <span className="round-number">Round {round.roundNumber}</span>
-                                                    <span className="round-status">{round.status}</span>
-                                                </div>
-                                                <div className="round-detail">
-                                                    <strong>{round.interviewType}</strong>
-                                                    <span>{formatDateTime(round.scheduledAt)}</span>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            <div className="action-buttons">
-                                <h3>Actions</h3>
-                                {renderActionButtons()}
+                                <p>Application ID: {details.applicationId} • for {details.candidateName}</p>
                             </div>
-                        </div>
-                    </div>
+                            <div className="header-actions">
+                                <button className="btn-action outline" onClick={() => navigate(-1)}>
+                                    <FiArrowLeft /> Back
+                                </button>
+                            </div>
+                        </header>
 
-                    {/* Right Column: Comments */}
-                    <div className="content-card comments-panel">
-                        <div className="card-header">
-                            <h2>Comments & Feedback</h2>
-                        </div>
-                        <div className="card-body">
-                            <div className="comments-log">
-                                {details.comments && details.comments.length > 0 ? details.comments.map((comment, index) => (
-                                    <div key={index} className="comment-item">
-                                        <p className="comment-text">"{comment.commentText}"</p>
-                                        <p className="comment-meta">by <strong>{comment.authorName}</strong> on {new Date(comment.createdAt).toLocaleDateString()}</p>
+                        <div className="review-grid">
+                            <div className="content-card candidate-info-panel">
+                                <div className="card-header">
+                                    <h2>Candidate Details</h2>
+                                </div>
+                                <div className="card-body">
+                                    {details.pastApplications && details.pastApplications.length > 0 && (
+                                        <div className="past-activity-notification" style={{marginBottom: '1.5rem'}}>
+                                            <p><strong>⚠️ Past Activity:</strong> This candidate has applied for other positions before.</p>
+                                        </div>
+                                    )}
+
+                                    <p><strong>Name:</strong> {details.candidateName}</p>
+                                    <p><strong>Email:</strong> {details.candidateEmail}</p>
+
+                                    {details.candidateCvPath ? (
+                                        <a href={`http://localhost:5256/${details.candidateCvPath}`} target="_blank" rel="noopener noreferrer" className="view-cv-button">View CV</a>
+                                    ) : (
+                                        <p className="error-message">CV not yet uploaded.</p>
+                                    )}
+
+                                    {details.interviewHistory && details.interviewHistory.length > 0 && (
+                                        <div className="interview-history-section">
+                                            <h4>Interview History</h4>
+                                            <ul className="history-list">
+                                                {details.interviewHistory.map((round, idx) => (
+                                                    <li key={idx} className={`history-round status-${round.status.toLowerCase()}`}>
+                                                        <div className="round-top">
+                                                            <span className="round-number">Round {round.roundNumber}</span>
+                                                            <span className="round-status">{round.status}</span>
+                                                        </div>
+                                                        <div className="round-detail">
+                                                            <strong>{round.interviewType}</strong>
+                                                            <span>{formatDateTime(round.scheduledAt)}</span>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    <div className="action-buttons">
+                                        <h3>Actions</h3>
+                                        {renderActionButtons()}
                                     </div>
-                                )) : <p style={{color: '#6b7280', fontStyle: 'italic'}}>No comments yet.</p>}
+                                </div>
                             </div>
-                            <form onSubmit={handleAddComment} className="comment-form">
-                                <textarea
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    placeholder="Add internal note..."
-                                    required
-                                />
-                                <button type="submit">Add Note</button>
-                            </form>
+
+                            <div className="content-card comments-panel">
+                                <div className="card-header">
+                                    <h2>Comments & Feedback</h2>
+                                </div>
+                                <div className="card-body">
+                                    <div className="comments-log">
+                                        {details.comments && details.comments.length > 0 ? details.comments.map((comment, index) => (
+                                            <div key={index} className="comment-item">
+                                                <p className="comment-text">"{comment.commentText}"</p>
+                                                <p className="comment-meta">by <strong>{comment.authorName}</strong> on {new Date(comment.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        )) : <p style={{color: '#6b7280', fontStyle: 'italic'}}>No comments yet.</p>}
+                                    </div>
+                                    <form onSubmit={handleAddComment} className="comment-form">
+                                        <textarea
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            placeholder="Add internal note..."
+                                            required
+                                        />
+                                        <button type="submit">Add Note</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </>
+                )}
             </main>
 
-            <ScheduleInterviewModal
-                isOpen={isScheduleModalOpen}
-                onClose={() => setScheduleModalOpen(false)}
-                application={applicationForModal}
-                onInterviewScheduled={fetchDetails}
-            />
+            {details && (
+                <ScheduleInterviewModal
+                    isOpen={isScheduleModalOpen}
+                    onClose={() => setScheduleModalOpen(false)}
+                    application={{
+                        application_id: details.applicationId,
+                        job_id: details.jobId,
+                        candidate: {
+                            first_name: details.candidateName ? details.candidateName.split(' ')[0] : '',
+                            last_name: details.candidateName ? details.candidateName.split(' ').slice(1).join(' ') : ''
+                        }
+                    }}
+                    onInterviewScheduled={fetchDetails}
+                />
+            )}
         </div>
     );
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Recruitment.API.DTOs;
-using Recruitment.API.Models; 
+using Recruitment.API.Models;
 using Recruitment.API.Services;
 using System.Threading.Tasks;
 
@@ -9,7 +9,7 @@ namespace Recruitment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Recruiter")] 
+    [Authorize(Roles = "Recruiter")]
     public class JobsController : ControllerBase
     {
         private readonly IRecruiterRepository _recruiterRepo;
@@ -42,6 +42,30 @@ namespace Recruitment.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("interviewers")]
+        public async Task<IActionResult> GetAvailableInterviewers()
+        {
+            var response = await _recruiterRepo.GetAvailableInterviewersAsync();
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("{jobId}/interviewers")]
+        public async Task<IActionResult> AssignInterviewer(int jobId, AssignReviewerDto dto)
+        {
+            var response = await _recruiterRepo.AssignInterviewerToJobAsync(jobId, dto.ReviewerUserId);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpGet("hr")]
+        public async Task<IActionResult> GetAvailableHrUsers()
+        {
+            var response = await _recruiterRepo.GetAvailableHrUsersAsync();
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
         [HttpGet("reviewers")]
         public async Task<IActionResult> GetAvailableReviewers()
         {
@@ -58,21 +82,5 @@ namespace Recruitment.API.Controllers
             if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
-
-        [HttpGet("interviewers")] 
-        public async Task<IActionResult> GetAvailableInterviewers()
-        {
-            var response = await _recruiterRepo.GetAvailableInterviewersAsync();
-            return Ok(response);
-        }
-
-        [HttpPost("{jobId}/interviewers")]
-        public async Task<IActionResult> AssignInterviewer(int jobId, AssignReviewerDto dto) 
-        {
-            var response = await _recruiterRepo.AssignInterviewerToJobAsync(jobId, dto.ReviewerUserId); 
-            if (!response.Success) return BadRequest(response);
-            return Ok(response);
-        }
     }
 }
-

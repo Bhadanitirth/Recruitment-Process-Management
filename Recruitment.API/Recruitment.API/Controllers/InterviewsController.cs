@@ -27,7 +27,7 @@ public class InterviewsController : ControllerBase
     }
 
     [HttpGet("{interviewId}")]
-    [Authorize(Roles = "Interviewer,Recruiter")] 
+    [Authorize(Roles = "Interviewer,Recruiter,HR")] 
     public async Task<IActionResult> GetInterviewDetails(int interviewId)
     {
         var response = await _interviewerRepo.GetInterviewDetailsAsync(interviewId);
@@ -36,7 +36,7 @@ public class InterviewsController : ControllerBase
     }
 
     [HttpPost("{interviewId}/feedback")]
-    [Authorize(Roles = "Interviewer")]
+    [Authorize(Roles = "Interviewer,HR")]
     public async Task<IActionResult> SubmitFeedback(int interviewId, FeedbackSubmitDto feedbackDto)
     {
         var response = await _interviewerRepo.SubmitFeedbackAsync(interviewId, feedbackDto);

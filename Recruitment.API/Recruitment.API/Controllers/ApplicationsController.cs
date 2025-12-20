@@ -15,14 +15,11 @@ namespace Recruitment.API.Controllers
         private readonly IRecruiterRepository _recruiterRepo;
         private readonly IReviewerRepository _reviewerRepo;
 
-        // --- THIS IS THE CRITICAL FIX ---
-        // You must assign BOTH repositories here.
         public ApplicationsController(IRecruiterRepository recruiterRepo, IReviewerRepository reviewerRepo)
         {
             _recruiterRepo = recruiterRepo;
-            _reviewerRepo = reviewerRepo; // <--- If this line is missing, the code crashes later!
+            _reviewerRepo = reviewerRepo;
         }
-        // --- END OF FIX ---
 
         [HttpGet]
         [Authorize(Roles = "Recruiter")]
@@ -56,7 +53,6 @@ namespace Recruitment.API.Controllers
 
             var response = await _reviewerRepo.AddCommentAsync(applicationId, commentDto.CommentText);
 
-            // Guard clause for null response
             if (response == null) return StatusCode(500, "Repository returned null response.");
 
             if (!response.Success)
@@ -69,17 +65,14 @@ namespace Recruitment.API.Controllers
         [HttpPut("{applicationId}/status")]
         public async Task<IActionResult> UpdateStatus(int applicationId, [FromBody] StatusUpdateDto statusDto)
         {
-            // Safety Checks to prevent crashes
             if (statusDto == null) return BadRequest("Invalid request: No status data received.");
 
-            // This check confirms if the fix above worked
             if (_reviewerRepo == null) return StatusCode(500, "Internal Server Error: Reviewer Repository not initialized.");
 
             try
             {
                 var response = await _reviewerRepo.UpdateApplicationStatusAsync(applicationId, statusDto.NewStatus);
 
-                // --- ADDED NULL CHECK HERE ---
                 if (response == null)
                 {
                     return StatusCode(500, "Internal Server Error: Repository returned null.");

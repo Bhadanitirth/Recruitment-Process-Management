@@ -34,65 +34,24 @@ namespace Recruitment.API.Services
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
 
-        public async Task<ServiceResponse<InterviewFeedback>> SubmitFeedbackAsync(int interviewId, FeedbackSubmitDto feedbackDto)
-        {
-            var interviewerId = GetCurrentUserId();
-
-            if (!await _context.Interview_Panel.AnyAsync(ip => ip.interview_id == interviewId && ip.interviewer_user_id == interviewerId))
-                return new ServiceResponse<InterviewFeedback> { Success = false, Message = "You are not assigned to this interview." };
-
-            if (await _context.Interview_Feedback.AnyAsync(f => f.interview_id == interviewId && f.interviewer_user_id == interviewerId))
-                return new ServiceResponse<InterviewFeedback> { Success = false, Message = "Feedback already submitted for this interview." };
-
-            var feedback = new InterviewFeedback
-            {
-                interview_id = interviewId,
-                interviewer_user_id = interviewerId,
-                rating = feedbackDto.Rating,
-                comments = feedbackDto.Comments,
-                recommendation = feedbackDto.Recommendation
-            };
-
-            _context.Interview_Feedback.Add(feedback);
-
-            var interview = await _context.Interviews.FindAsync(interviewId);
-            if (interview != null)
-            {
-                interview.status = "Completed";
-
-                var application = await _context.Applications.FindAsync(interview.application_id);
-                if (application != null)
-                {
-                    // --- THIS IS THE LOGIC FIX ---
-                    if (feedback.recommendation == "Proceed")
-                    {
-                        // If Proceed, move back to "Shortlisted" so Recruiter can schedule the NEXT round
-                        application.status = "Shortlisted";
-                    }
-                    else if (feedback.recommendation == "Hold")
-                    {
-                        application.status = "On-Hold";
-                    }
-                    else if (feedback.recommendation == "Reject")
-                    {
-                        application.status = "Rejected";
-                    }
-                    // --- END OF LOGIC FIX ---
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            return new ServiceResponse<InterviewFeedback> { Data = feedback, Message = "Feedback submitted." };
-        }
-
-        // ... (Keep existing methods: GetAssignedInterviewsAsync, GetInterviewDetailsAsync) ...
-        #region Unchanged Methods
         public async Task<ServiceResponse<List<InterviewerDashboardItemDto>>> GetAssignedInterviewsAsync()
         {
             var interviewerId = GetCurrentUserId();
-            var interviews = await _context.Interview_Panel
-                .Where(ip => ip.interviewer_user_id == interviewerId)
+            var userRole = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
+
+            var query = _context.Interview_Panel
+                .Where(ip => ip.interviewer_user_id == interviewerId);
+
+            if (userRole == "Interviewer")
+            {
+                query = query.Where(ip => ip.Interview.interview_type == "Technical" || ip.Interview.interview_type == "Online Test");
+            }
+            else if (userRole == "HR")
+            {
+                query = query.Where(ip => ip.Interview.interview_type == "HR");
+            }
+
+            var interviews = await query
                 .Include(ip => ip.Interview)
                     .ThenInclude(i => i.Application)
                         .ThenInclude(a => a.Candidate)
@@ -103,36 +62,50 @@ namespace Recruitment.API.Services
                 {
                     InterviewId = ip.interview_id,
                     CandidateName = ip.Interview.Application.Candidate != null ? $"{ip.Interview.Application.Candidate.first_name} {ip.Interview.Application.Candidate.last_name}" : "N/A",
-                    JobTitle = ip.Interview.Application.Job != null ? ip.Interview.Application.Job.title : "N/Player",
+                    JobTitle = ip.Interview.Application.Job != null ? ip.Interview.Application.Job.title : "N/A",
                     InterviewType = ip.Interview.interview_type,
                     ScheduledAt = ip.Interview.scheduled_at ?? default,
                     Status = ip.Interview.status
                 })
                 .OrderBy(i => i.ScheduledAt)
                 .ToListAsync();
+
             return new ServiceResponse<List<InterviewerDashboardItemDto>> { Data = interviews };
         }
+
         public async Task<ServiceResponse<InterviewDetailsDto>> GetInterviewDetailsAsync(int interviewId)
         {
             _logger.LogInformation("Fetching details for interview ID {InterviewId}", interviewId);
             try
             {
                 var currentUserId = GetCurrentUserId();
+                var userRole = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Role);
+
                 var interview = await _context.Interviews
                     .Include(i => i.Application).ThenInclude(a => a.Candidate)
                     .Include(i => i.Application).ThenInclude(a => a.Job)
                     .Include(i => i.PanelMembers).ThenInclude(pm => pm.Interviewer)
                     .FirstOrDefaultAsync(i => i.interview_id == interviewId);
 
-                if (interview == null) return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Interview not found." };
+                if (interview == null)
+                    return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Interview not found." };
 
-                var userRole = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Role);
                 var isRecruiter = userRole == "Recruiter";
                 var isAssigned = interview.PanelMembers.Any(pm => pm.interviewer_user_id == currentUserId);
 
                 if (!isRecruiter && !isAssigned)
                 {
+                    _logger.LogWarning("Security Breach: User {UserId} tried to access interview {InterviewId}.", currentUserId, interviewId);
                     return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "You are not authorized to view this interview." };
+                }
+
+                if (!isRecruiter) 
+                {
+                    if (userRole == "Interviewer" && interview.interview_type == "HR")
+                        return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Access Denied: This is an HR interview." };
+
+                    if (userRole == "HR" && (interview.interview_type == "Technical" || interview.interview_type == "Online Test"))
+                        return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "Access Denied: This is a Technical interview." };
                 }
 
                 var submittedFeedback = await _context.Interview_Feedback
@@ -175,6 +148,55 @@ namespace Recruitment.API.Services
                 return new ServiceResponse<InterviewDetailsDto> { Success = false, Message = "An error occurred while fetching details." };
             }
         }
-        #endregion
+
+        public async Task<ServiceResponse<InterviewFeedback>> SubmitFeedbackAsync(int interviewId, FeedbackSubmitDto feedbackDto)
+        {
+            var interviewerId = GetCurrentUserId();
+            var userRole = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Role);
+
+            if (!await _context.Interview_Panel.AnyAsync(ip => ip.interview_id == interviewId && ip.interviewer_user_id == interviewerId))
+                return new ServiceResponse<InterviewFeedback> { Success = false, Message = "You are not assigned to this interview." };
+
+            var interviewType = await _context.Interviews.Where(i => i.interview_id == interviewId).Select(i => i.interview_type).FirstOrDefaultAsync();
+            if (userRole == "Interviewer" && interviewType == "HR") return new ServiceResponse<InterviewFeedback> { Success = false, Message = "Technical Interviewers cannot submit HR feedback." };
+
+            if (await _context.Interview_Feedback.AnyAsync(f => f.interview_id == interviewId && f.interviewer_user_id == interviewerId))
+                return new ServiceResponse<InterviewFeedback> { Success = false, Message = "Feedback already submitted for this interview." };
+
+            var feedback = new InterviewFeedback
+            {
+                interview_id = interviewId,
+                interviewer_user_id = interviewerId,
+                rating = feedbackDto.Rating,
+                comments = feedbackDto.Comments,
+                recommendation = feedbackDto.Recommendation
+            };
+
+            _context.Interview_Feedback.Add(feedback);
+
+            var interview = await _context.Interviews.FindAsync(interviewId);
+            if (interview != null)
+            {
+                interview.status = "Completed";
+
+                if (feedback.recommendation == "Hold" || feedback.recommendation == "Reject")
+                {
+                    var application = await _context.Applications.FindAsync(interview.application_id);
+                    if (application != null)
+                    {
+                        application.status = (feedback.recommendation == "Hold") ? "On Hold" : "Rejected";
+                    }
+                }
+                else if (feedback.recommendation == "Proceed")
+                {
+                    var application = await _context.Applications.FindAsync(interview.application_id);
+                    if (application != null) application.status = "Shortlisted";
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<InterviewFeedback> { Data = feedback, Message = "Feedback submitted." };
+        }
     }
 }

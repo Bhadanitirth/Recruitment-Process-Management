@@ -3,15 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FiBriefcase, FiUsers, FiBarChart2, FiLogOut, FiPlus, FiGrid, FiList, FiArrowRight } from 'react-icons/fi';
 import './RecruiterDashboard.css';
-import RecruiterSidebar from './RecruiterSidebar';
 import CreateJobModal from './CreateJobModal';
 import AddCandidateModal from './AddCandidateModal.jsx';
 import BulkAddModal from './BulkAddModal';
+import Sidebar from '../common/Sidebar';
 
 function RecruiterDashboard() {
     const [jobs, setJobs] = useState([]);
     const [candidates, setCandidates] = useState([]);
-    // --- NEW STATE for summary data ---
     const [summary, setSummary] = useState({ interviewsScheduled: 0 });
 
     const [loading, setLoading] = useState(true);
@@ -33,13 +32,11 @@ function RecruiterDashboard() {
             const [jobsResponse, candidatesResponse, summaryResponse] = await Promise.all([
                 axios.get('http://localhost:5256/api/jobs', { headers }),
                 axios.get('http://localhost:5256/api/candidates', { headers }),
-                // --- NEW API CALL ---
                 axios.get('http://localhost:5256/api/reports/summary', { headers })
             ]);
 
             setJobs(jobsResponse.data.data || []);
             setCandidates(candidatesResponse.data.data || []);
-            // --- SET SUMMARY DATA ---
             setSummary(summaryResponse.data.data || { interviewsScheduled: 0 });
 
         } catch (err) {
@@ -61,7 +58,7 @@ function RecruiterDashboard() {
 
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="dashboard" />
+            <Sidebar role="Recruiter" activeItem="dashboard" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -117,7 +114,6 @@ function RecruiterDashboard() {
                             <div className="stat-card">
                                 <div className="stat-icon interviews-icon"><FiList /></div>
                                 <div className="stat-info">
-                                    {/* --- USE DYNAMIC DATA HERE --- */}
                                     <h3>{summary.interviewsScheduled}</h3>
                                     <p>Interviews Today</p>
                                 </div>
@@ -125,7 +121,6 @@ function RecruiterDashboard() {
                         </div>
 
                         <div className="content-grid">
-                            {/* ... (Recent Jobs Section remains unchanged) ... */}
                             <div className="content-card">
                                 <div className="card-header">
                                     <h2>Open Positions</h2>
@@ -173,7 +168,6 @@ function RecruiterDashboard() {
                                 </div>
                             </div>
 
-                            {/* ... (Recent Candidates Section remains unchanged) ... */}
                             <div className="content-card">
                                 <div className="card-header">
                                     <h2>Recent Candidates</h2>

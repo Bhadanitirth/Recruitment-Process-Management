@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import './RecruiterDashboard.css';
-import RecruiterSidebar from './RecruiterSidebar';
 import AddCandidateModal from './AddCandidateModal.jsx';
 import BulkAddModal from './BulkAddModal';
+import Sidebar from "../common/Sidebar.jsx";
 
 function CandidatesPage() {
     const [candidates, setCandidates] = useState([]);
@@ -38,7 +38,6 @@ function CandidatesPage() {
         fetchCandidates();
     }, [fetchCandidates]);
 
-    // Filter Logic
     useEffect(() => {
         const term = searchTerm.toLowerCase();
         const results = candidates.filter(c =>
@@ -53,7 +52,7 @@ function CandidatesPage() {
 
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="candidates" />
+            <Sidebar role="Recruiter" activeItem="candidates" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -74,7 +73,6 @@ function CandidatesPage() {
                 <div className="content-card full-width">
                     <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h2>All Candidates</h2>
-                        {/* Search Bar */}
                         <div className="search-container">
                             <FiSearch className="search-icon" />
                             <input

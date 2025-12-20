@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import { FiX } from 'react-icons/fi'; // Import Close Icon
-import '../common/Modal.css'; // Reuse existing modal styles
+import { FiX } from 'react-icons/fi';
+import '../common/Modal.css';
 
 function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
     const [availableReviewers, setAvailableReviewers] = useState([]);
@@ -12,7 +12,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // Fetch the list of available reviewers when the modal opens
         if (isOpen) {
             const fetchReviewers = async () => {
                 setLoadingReviewers(true);
@@ -22,7 +21,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
                     const response = await axios.get('http://localhost:5256/api/jobs/reviewers', {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    // Format the response for react-select
                     const options = response.data.data.map(user => ({
                         value: user.userId,
                         label: `${user.name} (${user.email})`
@@ -37,7 +35,7 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
             };
             fetchReviewers();
         }
-    }, [isOpen]); // Re-fetch when modal opens
+    }, [isOpen]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,14 +49,13 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
         const token = localStorage.getItem('token');
         try {
             await axios.post(`http://localhost:5256/api/jobs/${jobId}/reviewers`,
-                { reviewerUserId: selectedReviewer.value }, // Send selected reviewer's ID
+                { reviewerUserId: selectedReviewer.value },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            // Optionally, call a function to refresh the job details page
             if (onReviewerAssigned) {
                 onReviewerAssigned();
             }
-            handleClose(); // Close modal on success
+            handleClose();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to assign reviewer.');
             console.error("Assign Reviewer Error:", err);
@@ -67,7 +64,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
         }
     };
 
-    // Reset state and call parent onClose function
     const handleClose = () => {
         setSelectedReviewer(null);
         setError('');
@@ -80,7 +76,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                {/* --- HEADER --- */}
                 <div className="modal-header">
                     <h2>Assign Reviewer to Job</h2>
                     <button className="close-btn-icon" onClick={handleClose} aria-label="Close">
@@ -88,7 +83,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
                     </button>
                 </div>
 
-                {/* --- BODY --- */}
                 <div className="modal-body">
                     {error && <div className="error-message">{error}</div>}
                     <form id="assign-reviewer-form" onSubmit={handleSubmit}>
@@ -108,7 +102,6 @@ function AssignReviewerModal({ isOpen, onClose, jobId, onReviewerAssigned }) {
                     </form>
                 </div>
 
-                {/* --- FOOTER --- */}
                 <div className="modal-actions">
                     <button type="button" onClick={handleClose} disabled={loadingAssign} className="btn-secondary">
                         Cancel

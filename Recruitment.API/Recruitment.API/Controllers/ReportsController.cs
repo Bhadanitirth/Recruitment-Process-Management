@@ -7,7 +7,7 @@ namespace Recruitment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Recruiter,Admin")] // Restricted access
+    [Authorize(Roles = "Recruiter,Admin")] 
     public class ReportsController : ControllerBase
     {
         private readonly IReportRepository _repo;

@@ -1,4 +1,3 @@
-/* Import fonts or variables if not globally available, but assuming they are from RecruiterDashboard.css */
 :root {
     --primary-color: #3A7A58;
     --primary-dark: #2f6347;
@@ -15,7 +14,7 @@
     right: 0;
     bottom: 0;
     background-color: var(--bg-overlay);
-    backdrop-filter: blur(4px); /* Professional blur effect */
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,18 +27,16 @@
     color: var(--text-dark);
     border-radius: 1rem;
     width: 90%;
-    max-width: 550px; /* Slightly wider */
+    max-width: 550px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border-color);
     position: relative;
-    /* Reset padding as we now have header/body/footer */
     padding: 0;
 }
 
-/* --- New Header Structure --- */
 .modal-header {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
@@ -77,14 +74,12 @@
     color: var(--text-dark);
 }
 
-/* --- Scrollable Body --- */
 .modal-body {
     padding: 1.5rem;
     overflow-y: auto;
-    flex: 1; /* Takes available space */
+    flex: 1;
 }
 
-/* --- Form Styles --- */
 .form-group {
     margin-bottom: 1.25rem;
 }
@@ -116,7 +111,7 @@
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(58, 122, 88, 0.1); /* Matching green glow */
+    box-shadow: 0 0 0 3px rgba(58, 122, 88, 0.1);
 }
 
 .form-group textarea {
@@ -124,7 +119,6 @@
     min-height: 100px;
 }
 
-/* React Select overrides */
 .react-select-container .react-select__control {
     border-color: var(--border-color);
     border-radius: 0.5rem;
@@ -135,7 +129,6 @@
     box-shadow: 0 0 0 1px var(--primary-color) !important;
 }
 
-/* --- Footer Actions --- */
 .modal-actions {
     padding: 1.25rem 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -192,7 +185,6 @@
     border: 1px solid #fecaca;
 }
 
-/* Scrollbar Styling */
 .modal-body::-webkit-scrollbar {
     width: 6px;
 }

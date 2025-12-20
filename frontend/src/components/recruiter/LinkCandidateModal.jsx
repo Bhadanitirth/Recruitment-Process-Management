@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
-import { FiX } from 'react-icons/fi'; // Import Close Icon
+import { FiX } from 'react-icons/fi';
 import '../common/Modal.css';
 
 function LinkCandidateModal({ isOpen, onClose, jobId, onCandidateLinked }) {
@@ -66,7 +66,6 @@ function LinkCandidateModal({ isOpen, onClose, jobId, onCandidateLinked }) {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                {/* --- HEADER --- */}
                 <div className="modal-header">
                     <h2>Link Candidate to Job</h2>
                     <button className="close-btn-icon" onClick={handleClose} aria-label="Close">
@@ -74,7 +73,6 @@ function LinkCandidateModal({ isOpen, onClose, jobId, onCandidateLinked }) {
                     </button>
                 </div>
 
-                {/* --- BODY --- */}
                 <div className="modal-body">
                     {error && <div className="error-message">{error}</div>}
                     <form id="link-candidate-form" onSubmit={handleSubmit}>
@@ -92,7 +90,6 @@ function LinkCandidateModal({ isOpen, onClose, jobId, onCandidateLinked }) {
                     </form>
                 </div>
 
-                {/* --- FOOTER --- */}
                 <div className="modal-actions">
                     <button type="button" onClick={handleClose} className="btn-secondary">Cancel</button>
                     <button type="submit" form="link-candidate-form" className="btn-primary" disabled={loading}>

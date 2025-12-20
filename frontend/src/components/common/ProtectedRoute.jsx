@@ -9,7 +9,6 @@ const ProtectedRoute = ({ children, allowedUserTypes }) => {
     }
 
     if (allowedUserTypes && !allowedUserTypes.includes(userType)) {
-        // Redirect to appropriate dashboard based on user type
         switch (userType) {
             case 'Recruiter':
                 return <Navigate to="/recruiter-dashboard" replace />;

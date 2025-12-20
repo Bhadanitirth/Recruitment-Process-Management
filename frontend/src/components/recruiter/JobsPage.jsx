@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiBriefcase, FiUsers, FiBarChart2, FiLogOut, FiGrid, FiPlus, FiSearch } from 'react-icons/fi';
 import './RecruiterDashboard.css';
-import RecruiterSidebar from './RecruiterSidebar';
 import CreateJobModal from './CreateJobModal';
+import Sidebar from "../common/Sidebar.jsx";
 
 function JobsPage() {
     const [jobs, setJobs] = useState([]);
@@ -53,7 +53,7 @@ function JobsPage() {
 
     return (
         <div className="dashboard-layout">
-            <RecruiterSidebar activePage="jobs" />
+            <Sidebar role="Recruiter" activeItem="jobs" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -71,7 +71,6 @@ function JobsPage() {
                 <div className="content-card full-width">
                     <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h2>All Jobs</h2>
-                        {/* Search Bar */}
                         <div className="search-container">
                             <FiSearch className="search-icon" />
                             <input
@@ -102,7 +101,7 @@ function JobsPage() {
                                             <td><div className="job-title">{job.title}</div></td>
                                             <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{job.description ? job.description.substring(0, 50) + '...' : ''}</span></td>
                                             <td><span className={`status-pill ${job.status.toLowerCase().replace(' ', '-')}`}>{job.status}</span></td>
-                                            <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{new Date(job.created_at).toLocaleDateString()}</span></td>
+                                                <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{new Date(job.created_at).toLocaleDateString()}</span></td>
                                             <td><Link to={`/jobs/${job.job_id}`} className="link-text">Manage</Link></td>
                                         </tr>
                                     ))}

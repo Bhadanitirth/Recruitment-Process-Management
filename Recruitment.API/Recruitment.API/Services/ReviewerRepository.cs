@@ -34,7 +34,6 @@ namespace Recruitment.API.Services
             throw new InvalidOperationException("User ID claim not found or invalid.");
         }
 
-        // --- METHOD 1: Get Application Details (Full Implementation) ---
         public async Task<ServiceResponse<ApplicationDetailsDto>> GetApplicationDetailsAsync(int applicationId)
         {
             _logger.LogInformation("Fetching details for application ID {ApplicationId}", applicationId);
@@ -131,7 +130,6 @@ namespace Recruitment.API.Services
             }
         }
 
-        // --- METHOD 2: Get Assigned Applications ---
         public async Task<ServiceResponse<List<ReviewerApplicationDto>>> GetAssignedApplicationsAsync()
         {
             var reviewerId = GetCurrentUserId();
@@ -161,7 +159,6 @@ namespace Recruitment.API.Services
             return new ServiceResponse<List<ReviewerApplicationDto>> { Data = applications };
         }
 
-        // --- METHOD 3: Add Comment ---
         public async Task<ServiceResponse<ApplicationComment>> AddCommentAsync(int applicationId, string commentText)
         {
             var comment = new ApplicationComment
@@ -175,7 +172,6 @@ namespace Recruitment.API.Services
             return new ServiceResponse<ApplicationComment> { Data = comment, Message = "Comment added." };
         }
 
-        // --- METHOD 4: Update Application Status (THIS WAS THE PROBLEM AREA) ---
         public async Task<ServiceResponse<bool>> UpdateApplicationStatusAsync(int applicationId, string newStatus)
         {
             var application = await _context.Applications.FindAsync(applicationId);

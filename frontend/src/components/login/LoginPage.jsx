@@ -12,7 +12,6 @@ const IllustrationSection = () => (
     </div>
 );
 
-// Removed HR from the main list
 const userTypes = [
     { name: 'Candidate', icon: <FiUser /> },
     { name: 'Recruiter', icon: <FiBriefcase /> },
@@ -25,7 +24,6 @@ const inputConfigs = {
     Recruiter: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
     Interviewer: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
     Reviewer: { icon: <FiMail />, type: 'email', placeholder: 'Email Address' },
-    // HR config removed as it falls under Interviewer tab logic now
 };
 
 function LoginPage() {
@@ -45,15 +43,13 @@ function LoginPage() {
         e.preventDefault();
         setError('');
 
-        // Determine the role to send to the backend
         let roleToSend = activeTab;
 
-        // Logic: If 'Interviewer' tab is selected, check the sub-role
         if (activeTab === 'Interviewer') {
             if (interviewerSubRole === 'HR') {
                 roleToSend = 'HR';
             } else {
-                roleToSend = 'Interviewer'; // Default for Technical
+                roleToSend = 'Interviewer';
             }
         }
 
@@ -61,7 +57,7 @@ function LoginPage() {
             const response = await axios.post('http://localhost:5256/api/auth/login', {
                 email: email,
                 password: password,
-                userType: roleToSend // Send the calculated role
+                userType: roleToSend
             });
             const token = response.data.data;
             localStorage.setItem('token', token);
@@ -80,7 +76,7 @@ function LoginPage() {
             } else if (userRole === 'HR') {
                 navigate('/hr-dashboard');
             } else {
-                navigate('/login'); // Fallback
+                navigate('/login');
             }
 
         } catch (err) {
@@ -116,7 +112,6 @@ function LoginPage() {
                             ))}
                         </div>
 
-                        {/* --- Sub-role Selection for Interviewer (Same UI Style) --- */}
                         {activeTab === 'Interviewer' && (
                             <div className="auth-tabs" style={{ marginTop: '-1rem', marginBottom: '1.5rem', backgroundColor: 'transparent', padding: '0' }}>
                                 <button
@@ -139,7 +134,6 @@ function LoginPage() {
                                 </button>
                             </div>
                         )}
-                        {/* --- End Sub-role Selection --- */}
 
                         <form className="auth-form__body" onSubmit={handleLogin}>
                             <div className="auth-form__field">
