@@ -19,11 +19,12 @@ import Footer from './components/common/Footer';
 import PrivacyPolicy from './components/common/PrivacyPolicy';
 import TermsOfService from './components/common/TermsOfService';
 import HelpCenter from './components/common/HelpCenter';
+import ForgotPasswordPage from "./components/login/ForgotPasswordPage.jsx";
 
 const AppLayout = () => {
     const location = useLocation();
 
-    const publicPaths = ['/login', '/signup', '/', '/privacy', '/terms', '/help'];
+    const publicPaths = ['/login', '/signup', '/', '/privacy', '/terms', '/help', '/forgot-password'];
 
     const noFooterPaths = ['/privacy', '/terms', '/help'];
 
@@ -45,6 +46,7 @@ const AppLayout = () => {
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsOfService />} />
                     <Route path="/help" element={<HelpCenter />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
                     {/* --- Protected Routes --- */}
                     <Route path="/candidate-dashboard" element={

@@ -28,9 +28,7 @@ const inputConfigs = {
 
 function LoginPage() {
     const [activeTab, setActiveTab] = useState('Candidate');
-    // New state for the sub-role selection (Technical vs HR)
     const [interviewerSubRole, setInterviewerSubRole] = useState('Technical');
-
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -43,8 +41,8 @@ function LoginPage() {
         e.preventDefault();
         setError('');
 
+        // Logic to handle sub-roles for backend request
         let roleToSend = activeTab;
-
         if (activeTab === 'Interviewer') {
             if (interviewerSubRole === 'HR') {
                 roleToSend = 'HR';
@@ -59,27 +57,36 @@ function LoginPage() {
                 password: password,
                 userType: roleToSend
             });
-            const token = response.data.data;
-            localStorage.setItem('token', token);
 
-            const decodedToken = jwtDecode(token);
-            const userRole = decodedToken.role;
+            if (response.data.success) {
+                const token = response.data.data;
 
-            if (userRole === 'Recruiter') {
-                navigate('/recruiter-dashboard');
-            } else if (userRole === 'Candidate') {
-                navigate('/candidate-dashboard');
-            } else if (userRole === 'Interviewer') {
-                navigate('/interviewer-dashboard');
-            } else if (userRole === 'Reviewer') {
-                navigate('/reviewer-dashboard');
-            } else if (userRole === 'HR') {
-                navigate('/hr-dashboard');
-            } else {
-                navigate('/login');
+                // 1. Decode Token
+                const decodedToken = jwtDecode(token);
+                // Handle different claim casing (Microsoft identity sometimes uses URIs)
+                const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+                // 2. SAVE TO LOCAL STORAGE (This was missing!)
+                localStorage.setItem('token', token);
+                localStorage.setItem('userType', userRole);
+
+                // 3. Navigate based on Role
+                if (userRole === 'Recruiter' || userRole === 'Admin') {
+                    navigate('/recruiter-dashboard');
+                } else if (userRole === 'Candidate') {
+                    navigate('/candidate-dashboard');
+                } else if (userRole === 'Interviewer' || userRole === 'Technical Interviewer') {
+                    navigate('/interviewer-dashboard');
+                } else if (userRole === 'Reviewer') {
+                    navigate('/reviewer-dashboard');
+                } else if (userRole === 'HR') {
+                    navigate('/hr-dashboard');
+                } else {
+                    setError(`Unknown Role: ${userRole}`);
+                }
             }
-
         } catch (err) {
+            console.error("Login Error:", err);
             if (err.response && err.response.data) {
                 setError(err.response.data.message || 'Login failed.');
             } else {
@@ -118,7 +125,7 @@ function LoginPage() {
                                     type="button"
                                     onClick={() => setInterviewerSubRole('Technical')}
                                     className={`auth-tabs__button ${interviewerSubRole === 'Technical' ? 'auth-tabs__button--active' : ''}`}
-                                    style={{ border: '1px solid #e5e7eb' }} // Ensure border is visible if background is transparent
+                                    style={{ border: '1px solid #e5e7eb' }}
                                 >
                                     <FiCpu />
                                     <span>Technical</span>
@@ -163,8 +170,10 @@ function LoginPage() {
                                     {showPassword ? <FiEye /> : <FiEyeOff />}
                                 </button>
                             </div>
-                            {error && <p className="auth-form__error">{error}</p>}
-                            <div className="auth-form__forgot"><a href="#">Forgot Password?</a></div>
+                            {error && <p className="auth-form__error" style={{color:'red'}}>{error}</p>}
+                            <div className="auth-form__forgot">
+                                <Link to="/forgot-password">Forgot Password?</Link>
+                            </div>
                             <button type="submit" className="auth-form__submit">Login</button>
                         </form>
                         <footer className="auth-form__footer">

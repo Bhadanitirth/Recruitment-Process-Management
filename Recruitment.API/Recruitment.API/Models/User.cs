@@ -12,7 +12,8 @@ namespace Recruitment.API.Models
         public string email { get; set; }
         public string password_hash { get; set; }
         public int role_id { get; set; }
-
+        public string? otp_code { get; set; }
+        public DateTime? otp_expiry { get; set; }
         [ForeignKey("role_id")]
         public Role Role { get; set; }
     }

@@ -102,9 +102,9 @@ function DocumentManagementPage() {
     };
 
     const renderSidebar = () => {
-        if (userRole === 'Candidate') return <Sidebar activeItem="applications" setActiveTab={() => navigate('/candidate-dashboard')} />;
-        if (userRole === 'HR') return <Sidebar activeItem="dashboard" />;
-        return <Sidebar activeItem="candidates" />;
+        if (userRole === 'Candidate') return <Sidebar role="Candidate" activeItem="applications" setActiveTab={() => navigate('/candidate-dashboard')} />;
+        if (userRole === 'HR') return <Sidebar role="HR" activeItem="dashboard" />;
+        return <Sidebar role="Candidate" activeItem="candidates" />;
     };
 
     if (loading) return <div className="loading-screen">Loading documents...</div>;

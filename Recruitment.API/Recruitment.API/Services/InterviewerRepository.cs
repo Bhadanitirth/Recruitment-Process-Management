@@ -178,6 +178,7 @@ namespace Recruitment.API.Services
             if (interview != null)
             {
                 interview.status = "Completed";
+                //Console.WriteLine(feedback.recommendation);
 
                 if (feedback.recommendation == "Hold" || feedback.recommendation == "Reject")
                 {
@@ -190,6 +191,7 @@ namespace Recruitment.API.Services
                 else if (feedback.recommendation == "Proceed")
                 {
                     var application = await _context.Applications.FindAsync(interview.application_id);
+                    //Console.WriteLine(application);
                     if (application != null) application.status = "Shortlisted";
                 }
             }

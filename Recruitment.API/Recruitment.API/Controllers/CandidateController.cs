@@ -18,7 +18,6 @@ namespace Recruitment.API.Controllers
             _candidateRepo = candidateRepo;
         }
 
-        // --- ADD THIS NEW ENDPOINT ---
         [HttpGet("me")]
         public async Task<IActionResult> GetMyProfile()
         {
@@ -30,7 +29,6 @@ namespace Recruitment.API.Controllers
             return Ok(response);
         }
 
-        // ... (The rest of your endpoints: GetOpenJobs, GetMyApplications, UploadCv remain the same)
         #region Unchanged Endpoints
         [HttpGet("jobs")]
         public async Task<IActionResult> GetOpenJobs()

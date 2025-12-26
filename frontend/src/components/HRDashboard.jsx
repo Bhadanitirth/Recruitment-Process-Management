@@ -47,7 +47,7 @@ function HRDashboard() {
     if (error) return <div className="error-screen">{error}</div>;
 
     const actionRequiredApps = applications.filter(app => app.status === 'Shortlisted');
-    const finalStageApps = applications.filter(app => ['Offered', 'Hired', 'On-Hold', 'Interview'].includes(app.status));
+    const finalStageApps = applications.filter(app => ['Shortlisted','Offered', 'Hired', 'On-Hold', 'Interview'].includes(app.status));
 
     return (
         <div className="dashboard-layout">

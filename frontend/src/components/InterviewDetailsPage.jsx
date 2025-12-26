@@ -96,7 +96,7 @@ function InterviewDetailsPage() {
             setDetails(response.data.data);
             setError('');
         } catch (err) {
-            console.error("Fetch Details Error:", err);
+            console.error("Fetch Error:", err);
             setError('Failed to load interview details.');
         } finally {
             setLoading(false);
