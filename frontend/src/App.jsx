@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './components/login/LoginPage';
 import SignupPage from './components/signup/SignupPage';
+import ForgotPasswordPage from './components/login/ForgotPasswordPage';
 import InterviewerDashboard from './components/InterviewerDashboard';
 import CandidateDashboard from './components/CandidateDashboard';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
@@ -16,39 +17,44 @@ import HRDashboard from "./components/HRDashboard.jsx";
 import ReportsDashboard from "./components/recruiter/ReportsDashboard.jsx";
 import Footer from './components/common/Footer';
 
+// Admin Components
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminUserManagement from './components/admin/AdminUserManagement';
+
+// Static Pages
 import PrivacyPolicy from './components/common/PrivacyPolicy';
 import TermsOfService from './components/common/TermsOfService';
 import HelpCenter from './components/common/HelpCenter';
-import ForgotPasswordPage from "./components/login/ForgotPasswordPage.jsx";
 
 const AppLayout = () => {
     const location = useLocation();
+    const publicPaths = ['/login', '/signup', '/forgot-password', '/', '/privacy', '/terms', '/help'];
+    const noFooterPaths = ['/privacy', '/terms', '/help', '/forgot-password'];
 
-    const publicPaths = ['/login', '/signup', '/', '/privacy', '/terms', '/help', '/forgot-password'];
-
-    const noFooterPaths = ['/privacy', '/terms', '/help'];
-
-    const isPublicPage = publicPaths.some(path =>
-        location.pathname === path || location.pathname === path + '/'
-    );
-
-    const showFooter = !noFooterPaths.some(path =>
-        location.pathname === path || location.pathname === path + '/'
-    );
+    const isPublicPage = publicPaths.some(path => location.pathname === path || location.pathname === path + '/');
+    const showFooter = !noFooterPaths.some(path => location.pathname === path || location.pathname === path + '/');
 
     return (
         <>
             <div className="app-content" style={{ minHeight: 'calc(100vh - 80px)' }}>
                 <Routes>
-                    {/* --- Public Routes --- */}
+                    {/* Public Routes */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsOfService />} />
                     <Route path="/help" element={<HelpCenter />} />
-                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-                    {/* --- Protected Routes --- */}
+                    {/* Admin Routes */}
+                    <Route path="/admin-dashboard" element={
+                        <ProtectedRoute allowedUserTypes={['Admin']}> <AdminDashboard /> </ProtectedRoute>
+                    } />
+                    <Route path="/admin/users" element={
+                        <ProtectedRoute allowedUserTypes={['Admin']}> <AdminUserManagement /> </ProtectedRoute>
+                    } />
+
+                    {/* Role Based Routes */}
                     <Route path="/candidate-dashboard" element={
                         <ProtectedRoute allowedUserTypes={['Candidate']}> <CandidateDashboard /> </ProtectedRoute>
                     } />
@@ -68,29 +74,28 @@ const AppLayout = () => {
                         <ProtectedRoute allowedUserTypes={['Recruiter', 'Admin']}> <ReportsDashboard /> </ProtectedRoute>
                     } />
 
-                    {/* Recruiter & Shared Routes */}
+                    {/* Shared Resource Routes */}
                     <Route path="/recruiter/jobs" element={
-                        <ProtectedRoute allowedRoles={['Recruiter']}> <JobsPage /> </ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['Recruiter', 'Admin']}> <JobsPage /> </ProtectedRoute>
                     } />
                     <Route path="/recruiter/candidates" element={
-                        <ProtectedRoute allowedRoles={['Recruiter']}> <CandidatesPage /> </ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['Recruiter', 'Admin']}> <CandidatesPage /> </ProtectedRoute>
                     } />
                     <Route path="/jobs/:jobId" element={
-                        <ProtectedRoute allowedRoles={['Recruiter']}> <JobDetailsPage /> </ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['Recruiter', 'Admin']}> <JobDetailsPage /> </ProtectedRoute>
                     } />
                     <Route path="/applications/:applicationId" element={
-                        <ProtectedRoute allowedRoles={['Recruiter', 'Reviewer']}> <ApplicationReviewPage /> </ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['Recruiter', 'Reviewer', 'Admin']}> <ApplicationReviewPage /> </ProtectedRoute>
                     } />
                     <Route path="/interviews/:interviewId" element={
-                        <ProtectedRoute allowedRoles={['Interviewer', 'Recruiter']}> <InterviewDetailsPage /> </ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['Interviewer', 'Recruiter', 'HR', 'Admin']}> <InterviewDetailsPage /> </ProtectedRoute>
                     } />
                     <Route path="/applications/:applicationId/documents" element={
-                        <ProtectedRoute allowedRoles={['Recruiter', 'HR', 'Candidate']}>
+                        <ProtectedRoute allowedRoles={['Recruiter', 'HR', 'Candidate', 'Admin']}>
                             <DocumentManagementPage />
                         </ProtectedRoute>
                     } />
 
-                    {/* --- Fallback Route --- */}
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </div>

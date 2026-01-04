@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FiBriefcase, FiUsers, FiBarChart2, FiLogOut, FiGrid, FiPlus, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiSearch } from 'react-icons/fi';
 import './RecruiterDashboard.css';
 import CreateJobModal from './CreateJobModal';
 import Sidebar from "../common/Sidebar.jsx";
@@ -12,8 +12,15 @@ function JobsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isJobModalOpen, setJobModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(''); // Search State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [userRole, setUserRole] = useState(''); // State to hold the dynamic role
     const navigate = useNavigate();
+
+    // 1. Detect the current user's role on mount
+    useEffect(() => {
+        const storedRole = localStorage.getItem('userType');
+        setUserRole(storedRole || 'Recruiter'); // Default to Recruiter if missing
+    }, []);
 
     const fetchJobs = useCallback(async () => {
         setLoading(true);
@@ -36,7 +43,6 @@ function JobsPage() {
         fetchJobs();
     }, [fetchJobs]);
 
-    // Filter Logic
     useEffect(() => {
         const results = jobs.filter(job =>
             job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,14 +52,10 @@ function JobsPage() {
         setFilteredJobs(results);
     }, [searchTerm, jobs]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
-    };
-
     return (
         <div className="dashboard-layout">
-            <Sidebar role="Recruiter" activeItem="jobs" />
+            {/* 2. Pass the dynamic userRole to the Sidebar */}
+            <Sidebar role={userRole} activeItem="jobs" />
 
             <main className="dashboard-main">
                 <header className="main-header">
@@ -83,7 +85,7 @@ function JobsPage() {
                         </div>
                     </div>
                     <div className="card-body">
-                        {loading ? <p>Loading jobs...</p> : error ? <p className="error-message">{error}</p> : (
+                        {loading ? <div className="loading-state">Loading jobs...</div> : error ? <p className="error-message">{error}</p> : (
                             filteredJobs.length > 0 ? (
                                 <table className="dashboard-table">
                                     <thead>
@@ -100,8 +102,8 @@ function JobsPage() {
                                         <tr key={job.job_id}>
                                             <td><div className="job-title">{job.title}</div></td>
                                             <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{job.description ? job.description.substring(0, 50) + '...' : ''}</span></td>
-                                            <td><span className={`status-pill ${job.status.toLowerCase().replace(' ', '-')}`}>{job.status}</span></td>
-                                                <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{new Date(job.created_at).toLocaleDateString()}</span></td>
+                                            <td><span className={`status-pill status-${job.status.toLowerCase().replace(' ', '-')}`}>{job.status}</span></td>
+                                            <td><span style={{color: '#6b7280', fontSize: '0.9rem'}}>{new Date(job.created_at).toLocaleDateString()}</span></td>
                                             <td><Link to={`/jobs/${job.job_id}`} className="link-text">Manage</Link></td>
                                         </tr>
                                     ))}

@@ -7,7 +7,7 @@ namespace Recruitment.API.Controllers
 {
     [Route("api/interviewer")]
     [ApiController]
-    [Authorize(Roles = "Interviewer,HR")]
+    [Authorize(Roles = "Interviewer,HR,Admin")]
     public class InterviewerController : ControllerBase
     {
         private readonly IInterviewerRepository _interviewerRepo;

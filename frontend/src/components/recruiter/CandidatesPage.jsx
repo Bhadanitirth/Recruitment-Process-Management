@@ -16,6 +16,12 @@ function CandidatesPage() {
     const [isAddModalOpen, setAddModalOpen] = useState(false);
     const [isBulkModalOpen, setBulkModalOpen] = useState(false);
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState('');
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem('userType');
+        setUserRole(storedRole || 'Recruiter');
+    }, []);
 
     const fetchCandidates = useCallback(async () => {
         setLoading(true);
@@ -52,7 +58,7 @@ function CandidatesPage() {
 
     return (
         <div className="dashboard-layout">
-            <Sidebar role="Recruiter" activeItem="candidates" />
+            <Sidebar role={userRole} activeItem="candidates" />
 
             <main className="dashboard-main">
                 <header className="main-header">

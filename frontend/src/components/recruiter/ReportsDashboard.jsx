@@ -15,6 +15,12 @@ function ReportsDashboard() {
     const [funnelData, setFunnelData] = useState([]);
     const [collegeData, setCollegeData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [userRole, setUserRole] = useState('');
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem('userType');
+        setUserRole(storedRole || 'Recruiter'); // Default to Recruiter if missing
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -67,7 +73,7 @@ function ReportsDashboard() {
 
     return (
         <div className="dashboard-layout">
-            <Sidebar role="Recruiter" activeItem="reports" />
+            <Sidebar role={userRole} activeItem="reports" />
 
             <main className="dashboard-main">
                 <header className="main-header">

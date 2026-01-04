@@ -5,7 +5,7 @@ using Recruitment.API.Services;
 
 [Route("api/hr")]
 [ApiController]
-[Authorize(Roles = "Recruiter,HR")]
+[Authorize(Roles = "Recruiter,HR,Admin")]
 public class HRController : ControllerBase
 {
     private readonly IDocumentRepository _docRepo;

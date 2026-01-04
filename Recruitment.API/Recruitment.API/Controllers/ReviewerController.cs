@@ -7,7 +7,7 @@ namespace Recruitment.API.Controllers
 {
     [Route("api/reviewer")]
     [ApiController]
-    [Authorize(Roles = "Reviewer")] 
+    [Authorize(Roles = "Reviewer,Admin")] 
     public class ReviewerController : ControllerBase
     {
         private readonly IReviewerRepository _reviewerRepo;

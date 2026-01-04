@@ -9,7 +9,7 @@ namespace Recruitment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Recruiter")]
+    [Authorize(Roles = "Recruiter,Admin")]
     public class JobsController : ControllerBase
     {
         private readonly IRecruiterRepository _recruiterRepo;

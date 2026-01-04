@@ -35,7 +35,7 @@ namespace Recruitment.API.Controllers
             return Ok(response);
         }
         [HttpPost("offer-letter")]
-        [Authorize(Roles = "Recruiter,HR")]
+        [Authorize(Roles = "Recruiter,HR,Admin")]
         public async Task<IActionResult> UploadOfferLetter(int applicationId, IFormFile file)
         {
             var response = await _docRepo.UploadOfferLetterAsync(applicationId, file);

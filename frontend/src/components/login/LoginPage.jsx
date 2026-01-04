@@ -8,7 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 
 const IllustrationSection = () => (
     <div className="auth-illustration">
-        <img src={loginImage} alt="A person working on a laptop." className="auth-illustration__image" />
+        <img src={loginImage} alt="Login" className="auth-illustration__image" />
     </div>
 );
 
@@ -41,14 +41,10 @@ function LoginPage() {
         e.preventDefault();
         setError('');
 
-        // Logic to handle sub-roles for backend request
+        // Prepare UserType for standard roles
         let roleToSend = activeTab;
         if (activeTab === 'Interviewer') {
-            if (interviewerSubRole === 'HR') {
-                roleToSend = 'HR';
-            } else {
-                roleToSend = 'Interviewer';
-            }
+            roleToSend = interviewerSubRole === 'HR' ? 'HR' : 'Interviewer';
         }
 
         try {
@@ -60,18 +56,17 @@ function LoginPage() {
 
             if (response.data.success) {
                 const token = response.data.data;
-
-                // 1. Decode Token
                 const decodedToken = jwtDecode(token);
-                // Handle different claim casing (Microsoft identity sometimes uses URIs)
+                // Handle various claim formats
                 const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
-                // 2. SAVE TO LOCAL STORAGE (This was missing!)
                 localStorage.setItem('token', token);
                 localStorage.setItem('userType', userRole);
 
-                // 3. Navigate based on Role
-                if (userRole === 'Recruiter' || userRole === 'Admin') {
+                // REDIRECT LOGIC
+                if (userRole === 'Admin') {
+                    navigate('/admin-dashboard');
+                } else if (userRole === 'Recruiter') {
                     navigate('/recruiter-dashboard');
                 } else if (userRole === 'Candidate') {
                     navigate('/candidate-dashboard');
@@ -82,15 +77,14 @@ function LoginPage() {
                 } else if (userRole === 'HR') {
                     navigate('/hr-dashboard');
                 } else {
-                    setError(`Unknown Role: ${userRole}`);
+                    setError('Unrecognized role.');
                 }
             }
         } catch (err) {
-            console.error("Login Error:", err);
             if (err.response && err.response.data) {
                 setError(err.response.data.message || 'Login failed.');
             } else {
-                setError('An unknown error occurred.');
+                setError('Connection error.');
             }
         }
     };
@@ -120,24 +114,12 @@ function LoginPage() {
                         </div>
 
                         {activeTab === 'Interviewer' && (
-                            <div className="auth-tabs" style={{ marginTop: '-1rem', marginBottom: '1.5rem', backgroundColor: 'transparent', padding: '0' }}>
-                                <button
-                                    type="button"
-                                    onClick={() => setInterviewerSubRole('Technical')}
-                                    className={`auth-tabs__button ${interviewerSubRole === 'Technical' ? 'auth-tabs__button--active' : ''}`}
-                                    style={{ border: '1px solid #e5e7eb' }}
-                                >
-                                    <FiCpu />
-                                    <span>Technical</span>
+                            <div className="auth-tabs" style={{ marginTop: '-1rem', marginBottom: '1.5rem', backgroundColor: 'transparent', padding: 0 }}>
+                                <button type="button" onClick={() => setInterviewerSubRole('Technical')} className={`auth-tabs__button ${interviewerSubRole === 'Technical' ? 'auth-tabs__button--active' : ''}`} style={{ border: '1px solid #e5e7eb' }}>
+                                    <FiCpu /> <span>Technical</span>
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setInterviewerSubRole('HR')}
-                                    className={`auth-tabs__button ${interviewerSubRole === 'HR' ? 'auth-tabs__button--active' : ''}`}
-                                    style={{ border: '1px solid #e5e7eb' }}
-                                >
-                                    <FiStar />
-                                    <span>HR</span>
+                                <button type="button" onClick={() => setInterviewerSubRole('HR')} className={`auth-tabs__button ${interviewerSubRole === 'HR' ? 'auth-tabs__button--active' : ''}`} style={{ border: '1px solid #e5e7eb' }}>
+                                    <FiStar /> <span>HR</span>
                                 </button>
                             </div>
                         )}
@@ -145,40 +127,19 @@ function LoginPage() {
                         <form className="auth-form__body" onSubmit={handleLogin}>
                             <div className="auth-form__field">
                                 <span className="auth-form__icon">{currentInputConfig.icon}</span>
-                                <input
-                                    type={currentInputConfig.type}
-                                    placeholder={currentInputConfig.placeholder}
-                                    aria-label={currentInputConfig.placeholder}
-                                    className="auth-form__input"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
+                                <input type={currentInputConfig.type} placeholder={currentInputConfig.placeholder} className="auth-form__input" value={email} onChange={(e) => setEmail(e.target.value)} required />
                             </div>
                             <div className="auth-form__field">
                                 <span className="auth-form__icon"><FiLock /></span>
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Password"
-                                    aria-label="Password"
-                                    className="auth-form__input auth-form__input--password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="auth-form__toggle-password" aria-label={showPassword ? "Hide password" : "Show password"}>
-                                    {showPassword ? <FiEye /> : <FiEyeOff />}
-                                </button>
+                                <input type={showPassword ? 'text' : 'password'} placeholder="Password" className="auth-form__input auth-form__input--password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="auth-form__toggle-password">{showPassword ? <FiEye /> : <FiEyeOff />}</button>
                             </div>
-                            {error && <p className="auth-form__error" style={{color:'red'}}>{error}</p>}
-                            <div className="auth-form__forgot">
-                                <Link to="/forgot-password">Forgot Password?</Link>
-                            </div>
+                            {error && <p className="auth-form__error">{error}</p>}
+                            <div className="auth-form__forgot"><Link to="/forgot-password">Forgot Password?</Link></div>
                             <button type="submit" className="auth-form__submit">Login</button>
                         </form>
                         <footer className="auth-form__footer">
-                            <p>Don't Have an account?{' '}<Link to="/signup">Sign Up</Link></p>
-                            <p className="auth-form__version">v25.10.30.1</p>
+                            <p>Don't Have an account? <Link to="/signup">Sign Up</Link></p>
                         </footer>
                     </div>
                 </div>

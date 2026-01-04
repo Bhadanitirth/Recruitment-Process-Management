@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "Recruiter")]
+[Authorize(Roles = "Recruiter,Admin")]
 public class SkillsController : ControllerBase
 {
     private readonly IRecruiterRepository _recruiterRepo;
